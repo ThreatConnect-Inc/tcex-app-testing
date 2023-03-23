@@ -1,0 +1,69 @@
+"""Stage Data Testing Module"""
+# standard library
+import base64
+import binascii
+import logging
+import sys
+
+# third-party
+from redis import Redis
+
+# first-party
+from tcex_app_testing.app.playbook import Playbook
+
+# get logger
+_logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
+
+
+class StagerKvstore:
+    """Stages the Redis Data"""
+
+    def __init__(self, playbook: Playbook, redis_client: Redis):
+        """Initialize class properties."""
+        self.playbook = playbook
+        self.redis_client = redis_client
+
+        # properties
+        self.log = _logger
+
+    def from_dict(self, staging_data):
+        """Stage redis data from dict"""
+        for variable, data in staging_data.items():
+            variable_type = self.playbook.get_variable_type(variable)
+
+            self.log.info(f'step=stage, data=from-dict, variable={variable}, value={data}')
+            if data is not None and variable_type == 'Binary':
+                data = self._decode_binary(data, variable)
+            elif data is not None and variable_type == 'BinaryArray':
+                data = [
+                    d for d in [self._decode_binary(d, variable) for d in data] if d is not None
+                ]
+
+            if data is not None:
+                self.playbook.create.any(variable, data, when_requested=False)
+
+    def stage(self, variable, data):
+        """Stage data in redis"""
+        self.playbook.create.any(variable, data, when_requested=False)
+
+    def delete_context(self, context):
+        """Delete data in redis"""
+        keys = self.redis_client.hkeys(context)
+        if keys:
+            return self.redis_client.hdel(context, *keys)
+        return 0
+
+    @staticmethod
+    def _decode_binary(binary_data, variable):
+        """Base64 decode binary data."""
+        try:
+            data = None
+            if binary_data is not None:
+                data = base64.b64decode(binary_data)
+        except binascii.Error as e:
+            print(
+                f'The Binary staging data for variable {variable} '
+                f'is not properly base64 encoded due to {e}.'
+            )
+            sys.exit()
+        return data

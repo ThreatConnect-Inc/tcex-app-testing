@@ -1,0 +1,18 @@
+[submodule "tcex_app_testing/util"]
+	path = tcex_app_testing/util
+	url = git@github.com:ThreatConnect-Inc/tcex-util.git
+[submodule "tcex_app_testing/requests_session"]
+	path = tcex_app_testing/requests_session
+	url = git@github.com:ThreatConnect-Inc/tcex-requests-session.git
+[submodule "tcex_app_testing/pleb"]
+	path = tcex_app_testing/pleb
+	url = git@github.com:ThreatConnect-Inc/tcex-pleb.git
+[submodule "tcex_app_testing/app/playbook"]
+	path = tcex_app_testing/app/playbook
+	url = git@github.com:ThreatConnect-Inc/tcex-app-playbook.git
+[submodule "tcex_app_testing/app/config"]
+	path = tcex_app_testing/app/config
+	url = git@github.com:ThreatConnect-Inc/tcex-app-config.git
+[submodule "tcex_app_testing/app/key_value_store"]
+	path = tcex_app_testing/app/key_value_store
+	url = git@github.com:ThreatConnect-Inc/tcex-app-key-value-store.git
