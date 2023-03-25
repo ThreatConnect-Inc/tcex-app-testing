@@ -32,9 +32,6 @@ repos:
       - id: bandit
         exclude: |
           (?x)(
-              ^app_init/|
-              ^docs/|
-              ^tcex/testing/|
               ^tests/
           )
   - repo: https://github.com/psf/black
@@ -64,12 +61,18 @@ repos:
   - repo: local
     hooks:
       - id: pyright
-        always_run: true
         entry: pyright
         language: system
         name: pyright
-        # always_run is required for pyright to work
-        types: [directory, file]
+        types: [python]
+  - repo: local
+    hooks:
+      - id: pyright-submodules
+        entry: pyright
+        language: system
+        name: pyright-submodules
+        # pre-commit types_or and types with multiple values don't work for submodules
+        types: [directory]
   - repo: local
     hooks:
       - id: pylint
