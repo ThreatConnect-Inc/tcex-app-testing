@@ -55,7 +55,7 @@ setup(
     entry_points={
         'console_scripts': ['tcex-app-test=tcex_app_testing.cli.cli:app'],
     },
-    extras_require={'dev': dev_packages, 'develop': dev_packages, 'development': dev_packages},
+    extras_require={'dev': dev_packages},
     include_package_data=True,
     install_requires=[
         'arrow',

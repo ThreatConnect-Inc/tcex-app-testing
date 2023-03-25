@@ -36,6 +36,7 @@ disable = [
   "duplicate-code",
   "fixme",
   "invalid-name",
+  "inconsistent-return-statements", # pylint doesn't properly handle "NoReturn" in all cases
   "logging-fstring-interpolation",
   "relative-beyond-top-level", # disable relative rule due to this project being a submodule
   "too-few-public-methods",
