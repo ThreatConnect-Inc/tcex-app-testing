@@ -1,1 +1,1 @@
-"""TcEx App Testing Module"""
+"""TcEx Framework Module"""

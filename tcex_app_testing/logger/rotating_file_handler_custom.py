@@ -1,4 +1,4 @@
-"""API Handler Class"""
+"""TcEx Framework Module"""
 # standard library
 import gzip
 import os

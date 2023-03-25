@@ -1,4 +1,4 @@
-"""Validate custom test case class."""
+"""TcEx Framework Module"""
 # first-party
 from tests.validate import Validate
 

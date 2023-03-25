@@ -1,5 +1,4 @@
-#!/usr/bin/env python
-"""TcEx Framework Test Generation Module."""
+"""TcEx Framework Module"""
 
 # first-party
 from tcex_app_testing.cli.cli_common import CliCommon

@@ -1,4 +1,4 @@
-"""Configuration"""
+"""TcEx Framework Module"""
 
 __all__ = ['config_model']
 

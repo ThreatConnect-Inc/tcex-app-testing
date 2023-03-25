@@ -1,4 +1,4 @@
-"""Test case template for App testing."""
+"""TcEx Framework Module"""
 # standard library
 import os
 import warnings

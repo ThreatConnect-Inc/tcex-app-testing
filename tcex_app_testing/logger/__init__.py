@@ -1,4 +1,4 @@
-"""TcEx App Testing Framework"""
+"""TcEx Framework Module"""
 
 from .rotating_file_handler_custom import RotatingFileHandlerCustom
 from .test_logger import TestLogger

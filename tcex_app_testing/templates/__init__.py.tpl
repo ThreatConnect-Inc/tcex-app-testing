@@ -1,1 +1,1 @@
-"""Test ${type}"""
+"""TcEx Framework Module"""

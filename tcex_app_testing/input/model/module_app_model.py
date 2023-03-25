@@ -1,4 +1,4 @@
-"""Model Definition"""
+"""TcEx Framework Module"""
 
 # third-party
 from pydantic import Extra

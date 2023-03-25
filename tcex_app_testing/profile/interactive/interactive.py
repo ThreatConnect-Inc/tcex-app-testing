@@ -1,4 +1,4 @@
-"""TcEx testing profile Class."""
+"""TcEx Framework Module"""
 # pylint: disable=too-many-lines
 
 # standard library
@@ -37,6 +37,7 @@ class Interactive:
         }
         self._staging_data = {'kvstore': {}}
         self._no_selection_text = 'No Selection'
+        self.accent = 'dark_orange'
         self.collect = InteractiveCollect(self)
         self.exit_codes = []
         self.ij = InstallJson()
@@ -113,7 +114,7 @@ class Interactive:
     def present(self):
         """Present interactive menu to build profile."""
 
-        Render.render_rule('Interactive Profile Creation')
+        Render.panel.rule(f'[{self.accent}]Interactive Profile Creation[{self.accent}]')
 
         def params_data() -> Iterator[tuple[str, ParamsModel]]:
             # handle non-layout and layout based App appropriately
@@ -150,11 +151,14 @@ class Interactive:
             # update inputs
             inputs[name] = value
 
-            Render.render_profile(inputs, self.staging_data.get('kvstore', {}))
+            # render a table with the current profile values
+            Render.table_profile(inputs, self.staging_data.get('kvstore', {}))
 
         self.present_exit_code()
         inputs['<exit_code>'] = str(self.exit_codes)
-        Render.render_profile(inputs, self.staging_data.get('kvstore', {}))
+
+        # render a table with the current profile values
+        Render.table_profile(inputs, self.staging_data.get('kvstore', {}))
 
     def present_boolean(self, name: str, data: ParamsModel) -> bool:
         """Build a question for boolean input.
@@ -163,8 +167,8 @@ class Interactive:
             name: The name of the input field.
             data: The install.json input param object.
         """
-        # print header information
-        Render.render_input_data_table(data)
+        # render header information
+        Render.table_input_data(data)
 
         default = self.util.get_default(data)
         valid_values = ['true', 'false']
@@ -199,8 +203,8 @@ class Interactive:
             name: The name of the input field.
             data: The install.json input param object.
         """
-        # print header information
-        Render.render_input_data_table(data)
+        # render header information
+        Render.table_input_data(data)
 
         default = self.util.get_default(data)
         option_index = 0
@@ -219,13 +223,13 @@ class Interactive:
                 if any(re.match(r'^\${.*}$', v) for v in valid_values):
                     option_index = 0
                 else:
-                    Render.render_failure_message(
+                    Render.panel.failure(
                         f'Invalid value of ({default}) for {data.name}, check that '
                         'default value and validValues match in install.json.'
                     )
         option_text = f'[{option_index}]'
 
-        Render.render_options(valid_values)
+        Render.panel.column_index(valid_values, 'Options')
 
         input_data_dict = data.dict()
         input_data_dict['default'] = option_index
@@ -248,8 +252,8 @@ class Interactive:
             name: The name of the input field.
             data: The install.json input param object.
         """
-        # print header information
-        Render.render_input_data_table(data)
+        # render header information
+        Render.table_input_data(data)
 
         default = self.util.get_default(data)
         option_index = 0
@@ -268,13 +272,13 @@ class Interactive:
                 if any(re.match(r'^\${.*}$', v) for v in valid_values):
                     option_index = 0
                 else:
-                    Render.render_failure_message(
+                    Render.panel.failure(
                         f'Invalid value of ({default}) for {data.name}, check'
                         'that default value and validValues match in install.json.'
                     )
         option_text = f'{option_index}'
 
-        Render.render_options(valid_values)
+        Render.panel.column_index(valid_values, 'Options')
 
         input_data_dict = data.dict()
         input_data_dict['default'] = option_index
@@ -313,13 +317,13 @@ class Interactive:
         if required is False:
             data_types.insert(0, self._no_selection_text)
 
-        Render.render_options(data_types)
+        Render.panel.column_index(data_types, 'Options')
 
         data_type = None
         while not data_type:
             index = (
                 self.collect._input_value(  # pylint: disable=protected-access
-                    label='Select a [dark_orange]Data Type[/dark_orange]', option_text='0'
+                    label=f'Select a [{self.accent}]Data Type[/{self.accent}]', option_text='0'
                 )
                 or 0
             )
@@ -327,7 +331,13 @@ class Interactive:
             try:
                 data_type = data_types[int(index)]
             except (IndexError, TypeError, ValueError):
-                Render.render_invalid_index_warning(f'0-{len(data_types) - 1}')
+                Render.panel.invalid_value(
+                    (
+                        f'The provided index value is not valid, please select a '
+                        f'valid value between 0-{len(data_types) - 1}.'
+                    ),
+                    title='Invalid Index Value',
+                )
                 return self.present_data_types(data_types, required)
 
         return data_type
@@ -343,8 +353,8 @@ class Interactive:
             name: The name of the input field.
             data: The install.json input param object.
         """
-        # print header information
-        Render.render_input_data_table(data)
+        # render header information
+        Render.table_input_data(data)
 
         # the default value from install.json or user_data
         default = self.util.get_default(data)  # array of default values
@@ -376,8 +386,8 @@ class Interactive:
             name: The name of the input field.
             data: The install.json input param object.
         """
-        # print header information
-        Render.render_input_data_table(data)
+        # render header information
+        Render.table_input_data(data)
 
         default = self.util.get_default(data)  # array of default values
         if not isinstance(default, list):
@@ -402,13 +412,13 @@ class Interactive:
                     if any(re.match(r'^\${.*}$', v) for v in valid_values):
                         continue
 
-                    Render.render_failure_message(
+                    Render.panel.failure(
                         f'''Invalid value of ({d}) for {data.name}, check that '''
                         'default value(s) and validValues match in install.json.'
                     )
         option_text = f''' [{','.join([str(v) for v in option_indexes])}]'''
 
-        Render.render_options(valid_values)
+        Render.panel.column_index(valid_values, 'Options')
 
         input_data_dict = data.dict()
         input_data_dict['default'] = option_indexes
@@ -432,7 +442,7 @@ class Interactive:
             data: The install.json input param object.
         """
         # display header information
-        Render.render_input_data_table(data)
+        Render.table_input_data(data)
 
         # use playbook data types to determine what input to provide (default to String)
         data_type = 'String'

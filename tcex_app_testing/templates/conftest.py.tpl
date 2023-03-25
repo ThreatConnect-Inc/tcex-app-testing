@@ -1,4 +1,4 @@
-"""Base pytest configuration file."""
+"""TcEx Framework Module"""
 # standard library
 import os
 import shutil

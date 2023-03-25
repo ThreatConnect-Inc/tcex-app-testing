@@ -1,4 +1,4 @@
-"""TcEx testing profile Class."""
+"""TcEx Framework Module"""
 # standard library
 import json
 import re
@@ -58,5 +58,5 @@ class ProfilePopulate:
                         )
                     profile = profile.replace(full_match, env_value)
             except IndexError:
-                Render.render_warning_message(f'Could not replace variable {m}).')
+                Render.panel.warning(f'Could not replace variable {m}).')
         return json.loads(profile)

@@ -1,4 +1,4 @@
-"""Validate feature test case class."""
+"""TcEx Framework Module"""
 # first-party
 from tests.validate_custom import ValidateCustom
 

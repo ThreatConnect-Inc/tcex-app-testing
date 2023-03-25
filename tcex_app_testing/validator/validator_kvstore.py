@@ -1,4 +1,4 @@
-"""Validator KV Store Module"""
+"""TcEx Framework Module"""
 # standard library
 from typing import TYPE_CHECKING, Any
 

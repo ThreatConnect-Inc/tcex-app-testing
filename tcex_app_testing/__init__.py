@@ -1,4 +1,4 @@
-"""TcEx App Testing Framework"""
+"""TcEx Framework Module"""
 
 # standard library
 import logging

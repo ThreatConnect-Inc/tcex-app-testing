@@ -1,1 +1,1 @@
-"""TcEx Module"""
+"""TcEx Framework Module"""

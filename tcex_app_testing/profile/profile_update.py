@@ -1,4 +1,4 @@
-"""TcEx Test Module."""
+"""TcEx Framework Module"""
 # standard library
 import json
 from typing import TYPE_CHECKING, Any

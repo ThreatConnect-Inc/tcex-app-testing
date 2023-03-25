@@ -1,4 +1,4 @@
-"""TcEx testing Framework."""
+"""TcEx Framework Module"""
 # standard library
 import json
 import logging

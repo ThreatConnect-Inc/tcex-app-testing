@@ -1,4 +1,4 @@
-"""TcEx Framework Bin Command Base Module."""
+"""TcEx Framework Module"""
 # standard library
 import logging
 import os

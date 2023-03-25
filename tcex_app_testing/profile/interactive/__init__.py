@@ -1,2 +1,2 @@
-"""TcEx App Testing Framework"""
+"""TcEx Framework Module"""
 from .interactive import Interactive

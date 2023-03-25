@@ -1,4 +1,4 @@
-"""TcEx App Testing Module."""
+"""TcEx Framework Module"""
 
 # standard library
 from base64 import b64encode
@@ -26,6 +26,7 @@ class InteractiveCollect:
 
         # properties
         self._no_selection_text = 'No Selection'
+        self.accent = 'dark_orange'
 
     def _input_value(
         self, label: str, array_type: bool = False, option_text: str | None = None
@@ -37,17 +38,30 @@ class InteractiveCollect:
             option_text: the Option text to display to the user.
             array_type: If the input is an array type.
         """
-        Render.render_prompt_text(
-            prompt_text=label, prompt_default=option_text, array_type=array_type
-        )
-        input_value = input('> ').strip()  # nosec
+        prompt_default = option_text or ''
+        if prompt_default:
+            prompt_default = (
+                f' (default: [bold {self.accent}]{prompt_default}[/bold {self.accent}])'
+            )
+        else:
+            prompt_default = ''
+
+        subtitle = f'[dim {self.accent}]? for help[/dim {self.accent}]'
+        if array_type is True:
+            subtitle = (
+                f'[dim italic {self.accent}]array input - hit enter on a '
+                f'blank input to end collection[/dim italic {self.accent}]'
+            )
+
+        # collect response
+        response = Render.prompt.input(label, prompt_default, subtitle)
 
         # handle special user inputs
-        if input_value == '?':
-            Render.render_prompt_help()
+        if response == '?':
+            Render.panel_help()
             return self._input_value(label, array_type=array_type, option_text=option_text)
 
-        return input_value
+        return response
 
     @cached_property
     def type_map(self) -> dict[str, Callable]:
@@ -69,8 +83,8 @@ class InteractiveCollect:
         # collect input value
         input_value: str = self._input_value(
             (
-                'Collecting [bold dark_orange]Binary[/bold dark_orange] input '
-                f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                f'Collecting [bold {self.accent}]Binary[/bold {self.accent}] input '
+                f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
             ),
             array_type=input_data_model.array_type,
             option_text=input_data_model.option_text,
@@ -78,7 +92,7 @@ class InteractiveCollect:
         if not input_value:
             # if no default value and required force user to input again
             if input_data_model.default is None and input_data_model.required is True:
-                Render.render_required_input()
+                Render.panel.error('This input is required, please enter an appropriate value.')
                 return self.binary(input_data_model)
 
         if input_value not in [None, '']:
@@ -101,17 +115,14 @@ class InteractiveCollect:
             # return None to ensure data doesn't get added to inputs
             input_values = None
 
-        # print user feedback
-        Render.render_feedback(input_values)
-
         return input_values
 
     def boolean(self, input_data_model: InteractiveParamsModel) -> bool:
         """Collect binary data."""
         input_value = self._input_value(
             (
-                'Collecting [bold dark_orange]Boolean[/bold dark_orange] input '
-                f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                f'Collecting [bold {self.accent}]Boolean[/bold {self.accent}] input '
+                f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
             ),
             option_text=input_data_model.option_text,
         )
@@ -119,16 +130,16 @@ class InteractiveCollect:
             input_value = input_data_model.default
 
         if str(input_value).lower() not in ['0', 'f', 'false', '1', 't', 'true']:
-            Render.render_invalid_bool()
+            Render.panel.invalid_value(
+                'The provided value is not a boolean value (true/false).',
+                title='Invalid Boolean Value',
+            )
             return self.boolean(input_data_model)
 
         input_value = cast(str, input_value)
 
         # convert input value to a proper boolean
         input_value = Util.to_bool(input_value)
-
-        # print user feedback
-        Render.render_feedback(input_value)
 
         return input_value
 
@@ -137,8 +148,8 @@ class InteractiveCollect:
         # collect input value from user and set default if required
         input_value = self._input_value(
             (
-                'Collecting [bold dark_orange]EditChoice[/bold dark_orange] input '
-                f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                f'Collecting [bold {self.accent}]EditChoice[/bold {self.accent}] input '
+                f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
             ),
             option_text=input_data_model.option_text,
         )
@@ -147,7 +158,7 @@ class InteractiveCollect:
 
         # ensure input value is provided when input is required
         if input_value is None and input_data_model.required is True:
-            Render.render_required_input()
+            Render.panel.error('This input is required, please enter an appropriate value.')
             return self.editchoice(input_data_model)
 
         # if input value is None then there is not need to continue
@@ -159,7 +170,13 @@ class InteractiveCollect:
             input_value_ = int(input_value)
             is_between = 0 <= input_value_ <= (len(input_data_model.valid_values) - 1)
             if not is_between:
-                Render.render_invalid_index_warning(f'0-{len(input_data_model.valid_values) - 1}')
+                Render.panel.invalid_value(
+                    (
+                        f'The provided index value is not valid, please select a '
+                        f'valid value between 0-{len(input_data_model.valid_values) - 1}.'
+                    ),
+                    title='Invalid Index Value',
+                )
                 return self.editchoice(input_data_model)
             input_value = input_data_model.valid_values[input_value_]
             if input_value == self._no_selection_text:
@@ -167,7 +184,7 @@ class InteractiveCollect:
                 input_value = None
 
         except ValueError:
-            Render.render_feedback(f'Using custom input {input_value}.')
+            Render.panel.info(f'Using custom input {input_value}.', title='Custom Input')
 
         if input_value is None:
             return None
@@ -179,8 +196,8 @@ class InteractiveCollect:
         # collect input value from user and set default if required
         input_value = self._input_value(
             (
-                'Collecting [bold dark_orange]Choice[/bold dark_orange] input '
-                f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                f'Collecting [bold {self.accent}]Choice[/bold {self.accent}] input '
+                f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
             ),
             array_type=input_data_model.array_type,
             option_text=input_data_model.option_text,
@@ -194,7 +211,7 @@ class InteractiveCollect:
 
         # ensure input value is provided when input is required
         if input_value is None and input_data_model.required is True:
-            Render.render_required_input()
+            Render.panel.error('This input is required, please enter an appropriate value.')
             return self.choice(input_data_model)
 
         # if input value is None then there is not need to continue
@@ -205,14 +222,25 @@ class InteractiveCollect:
         try:
             input_value = int(input_value)
         except ValueError:
-            Render.render_invalid_index_warning(f'0-{len(input_data_model.valid_values) - 1}')
+            Render.panel.invalid_value(
+                (
+                    f'The provided index value is not valid, please select a '
+                    f'valid value between 0-{len(input_data_model.valid_values) - 1}.'
+                ),
+                title='Invalid Index Value',
+            )
             return self.choice(input_data_model)
 
         # ensure input value is valid
         valid_index_values = [i for i, _ in enumerate(input_data_model.valid_values)]
-        # valid_index_values = list(range(0, len(valid_values) - 1))
         if input_value not in valid_index_values:
-            Render.render_invalid_index_warning(f'0-{len(input_data_model.valid_values) - 1}')
+            Render.panel.invalid_value(
+                (
+                    f'The provided index value is not valid, please select a '
+                    f'valid value between 0-{len(input_data_model.valid_values) - 1}.'
+                ),
+                title='Invalid Index Value',
+            )
             return self.choice(input_data_model)
 
         # using index value provided by user, set value to valid value
@@ -234,7 +262,7 @@ class InteractiveCollect:
         option_text = kwargs.get('option_text')
 
         input_value = self._input_value(
-            'Collection [bold dark_orange]Exit Code[/bold dark_orange]',
+            f'Collection [bold {self.accent}]Exit Code[/bold {self.accent}]',
             array_type=array_type,
             option_text=option_text,
         )
@@ -243,11 +271,15 @@ class InteractiveCollect:
             try:
                 input_value = int(input_value)
             except ValueError:
-                Render.render_invalid_exit_code()
+                Render.panel.invalid_value(
+                    'The provided value is not a valid exit code (0, 1).', title='Invalid Exit Code'
+                )
                 return self.exit_code(**kwargs)
 
             if input_value not in [0, 1, 3, 4]:
-                Render.render_invalid_exit_code()
+                Render.panel.invalid_value(
+                    'The provided value is not a valid exit code (0, 1).', title='Invalid Exit Code'
+                )
                 return self.exit_code(**kwargs)
 
         return input_value  # type: ignore
@@ -265,9 +297,6 @@ class InteractiveCollect:
             # return None to ensure data doesn't get added to inputs
             input_values = [0]
 
-        # print user feedback
-        Render.render_feedback(input_values)
-
         return input_values
 
     def key_value(self, input_data_model: InteractiveParamsModel) -> dict | None:
@@ -275,8 +304,8 @@ class InteractiveCollect:
         input_value = None
         key = self._input_value(
             (
-                'Collecting [bold dark_orange]Key[/bold dark_orange]Value input '
-                f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                f'Collecting [bold {self.accent}]Key[/bold {self.accent}]Value input '
+                f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
             ),
             array_type=input_data_model.array_type,
             option_text=input_data_model.option_text,
@@ -284,14 +313,14 @@ class InteractiveCollect:
 
         # ensure input value is provided when input is required
         if key == '' and input_data_model.required is True:
-            Render.render_required_input()
+            Render.panel.error('This input is required, please enter an appropriate value.')
             return self.key_value(input_data_model)
 
         if key != '':
             value = self._input_value(
                 (
-                    'Collecting Key[bold dark_orange]Value[/bold dark_orange] input '
-                    f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                    f'Collecting Key[bold {self.accent}]Value[/bold {self.accent}] input '
+                    f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
                 ),
                 array_type=input_data_model.array_type,
             )
@@ -315,9 +344,6 @@ class InteractiveCollect:
             # return None to ensure data doesn't get added to inputs
             input_values = None
 
-        # print user feedback
-        Render.render_feedback(input_values)
-
         return input_values
 
     def multichoice(self, input_data_model: InteractiveParamsModel) -> str | None:
@@ -340,17 +366,14 @@ class InteractiveCollect:
             # return None to ensure data doesn't get added to inputs
             input_values = None
 
-        # print user feedback
-        Render.render_feedback(input_values)
-
         return input_values
 
     def string(self, input_data_model: InteractiveParamsModel) -> str | None:
         """Collect string data."""
         input_value = self._input_value(
             label=(
-                'Collecting [bold dark_orange]String[/bold dark_orange] input '
-                f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                f'Collecting [bold {self.accent}]String[/bold {self.accent}] input '
+                f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
             ),
             array_type=input_data_model.array_type,
             option_text=input_data_model.option_text,
@@ -361,7 +384,7 @@ class InteractiveCollect:
             input_value = input_data_model.default
 
         if input_value is None and input_data_model.required is True:
-            Render.render_required_input()
+            Render.panel.error('This input is required, please enter an appropriate value.')
             return self.string(input_data_model)
 
         # APP-622 - handle null/None values
@@ -393,9 +416,6 @@ class InteractiveCollect:
             # return None to ensure data doesn't get added to inputs
             input_values = None
 
-        # print user feedback
-        Render.render_feedback(input_values)
-
         return input_values
 
     def tcentity(self, input_data_model: InteractiveParamsModel) -> dict | None:
@@ -403,30 +423,30 @@ class InteractiveCollect:
         input_value = None
         id_ = self._input_value(
             (
-                'Collecting [bold dark_orange]TCEntity Id[/bold dark_orange] input '
-                f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                f'Collecting [bold {self.accent}]TCEntity Id[/bold {self.accent}] input '
+                f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
             ),
             array_type=input_data_model.array_type,
         )
         if id_:
             value = self._input_value(
                 (
-                    'Collecting [bold dark_orange]TCEntity Value[/bold dark_orange] input '
-                    f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                    f'Collecting [bold {self.accent}]TCEntity Value[/bold {self.accent}] input '
+                    f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
                 ),
                 array_type=input_data_model.array_type,
             )
             type_ = self._input_value(
                 (
-                    'Collecting [bold dark_orange]TCEntity Type[/bold dark_orange] input '
-                    f'for [bold dark_orange]"{input_data_model.label}"[/bold dark_orange]'
+                    f'Collecting [bold {self.accent}]TCEntity Type[/bold {self.accent}] input '
+                    f'for [bold {self.accent}]"{input_data_model.label}"[/bold {self.accent}]'
                 ),
                 array_type=input_data_model.array_type,
             )
             input_value = {'id': id_, 'value': value, 'type': type_}
 
         if input_value is None and input_data_model.required is True:
-            Render.render_required_input()
+            Render.panel.error('This input is required, please enter an appropriate value.')
             return self.tcentity(input_data_model)
 
         return input_value
@@ -446,8 +466,5 @@ class InteractiveCollect:
         if not input_values:
             # return None to ensure data doesn't get added to inputs
             input_values = None
-
-        # print user feedback
-        Render.render_feedback(input_values)
 
         return input_values

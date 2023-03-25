@@ -1,4 +1,4 @@
-"""Profile Model"""
+"""TcEx Framework Module"""
 # pylint: disable=no-self-argument
 # standard library
 import json

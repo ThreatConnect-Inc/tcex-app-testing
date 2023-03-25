@@ -1,4 +1,4 @@
-"""TcEx Framework Env Store Module"""
+"""TcEx Framework Module"""
 # standard library
 import logging
 import os

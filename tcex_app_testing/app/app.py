@@ -1,4 +1,4 @@
-"""TcEx Module"""
+"""TcEx Framework Module"""
 
 from ..input.model.module_app_model import ModuleAppModel
 from ..pleb.cached_property import cached_property

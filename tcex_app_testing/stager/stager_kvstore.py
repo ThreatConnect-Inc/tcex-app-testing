@@ -1,15 +1,15 @@
-"""Stage Data Testing Module"""
+"""TcEx Framework Module"""
 # standard library
 import base64
 import binascii
 import logging
-import sys
 
 # third-party
 from redis import Redis
 
 # first-party
 from tcex_app_testing.app.playbook import Playbook
+from tcex_app_testing.render.render import Render
 
 # get logger
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
@@ -61,9 +61,8 @@ class StagerKvstore:
             if binary_data is not None:
                 data = base64.b64decode(binary_data)
         except binascii.Error as e:
-            print(
+            Render.panel.failure(
                 f'The Binary staging data for variable {variable} '
                 f'is not properly base64 encoded due to {e}.'
             )
-            sys.exit()
         return data

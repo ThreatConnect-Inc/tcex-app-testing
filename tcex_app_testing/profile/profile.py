@@ -1,8 +1,7 @@
-"""TcEx testing profile Class."""
+"""TcEx Framework Module"""
 # standard library
 import json
 import logging
-import sys
 from collections import OrderedDict
 from typing import Any
 
@@ -103,7 +102,7 @@ class Profile:
     def check_existing_profile(self):
         """Check if profile is existing."""
         if config_model.test_case_profile_filename.is_file():
-            Render.render_failure_message(
+            Render.panel.failure(
                 f'Profile file {config_model.test_case_profile_filename} already exists.'
             )
 
@@ -141,7 +140,7 @@ class Profile:
                 'feature=load-profile-contents, exception=file-not-found, '
                 f'filename={config_model.test_case_profile_filename}'
             )
-            Render.render_failure_message(
+            Render.panel.failure(
                 f'Profile file {config_model.test_case_profile_filename} not found.'
             )
         return contents_raw
@@ -284,9 +283,9 @@ class Profile:
                 f'event=validation-error, error={e}, '
                 f'filename={config_model.test_case_profile_filename_rel}'
             )
-            print(f'Invalid profile: filename="{config_model.test_case_profile_filename_rel}"')
-            print(e)
-            sys.exit(1)
+            Render.panel.failure(
+                f'Invalid profile: filename="{config_model.test_case_profile_filename_rel}"'
+            )
 
         # write the new contents to the file
         self.write(contents_)

@@ -1,4 +1,4 @@
-"""Setup for TcEx App Testing Module."""
+"""TcEx Framework Module"""
 # standard library
 import os
 

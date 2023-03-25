@@ -1,4 +1,4 @@
-"""TcEx Framework MQTT message broker module."""
+"""TcEx Framework Module"""
 # standard library
 import logging
 import ssl

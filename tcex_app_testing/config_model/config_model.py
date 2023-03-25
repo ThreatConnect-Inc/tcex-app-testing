@@ -1,4 +1,4 @@
-"""Model Definition"""
+"""TcEx Framework Module"""
 # standard library
 import json
 import logging

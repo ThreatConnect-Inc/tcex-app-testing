@@ -1,4 +1,4 @@
-"""Global tests that should run outside of any specific profile."""
+"""TcEx Framework Module"""
 
 # third-party
 from tcex_app_testing import __metadata__

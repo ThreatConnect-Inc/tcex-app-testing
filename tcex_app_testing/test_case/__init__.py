@@ -1,3 +1,3 @@
-"""Testing module for TcEx Framework"""
+"""TcEx Framework Module"""
 
 from .test_case_playbook import TestCasePlaybook

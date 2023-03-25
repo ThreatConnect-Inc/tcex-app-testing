@@ -1,4 +1,4 @@
-"""TcEx Playbook Common module"""
+"""TcEx Framework Module"""
 # standard library
 import time
 import uuid

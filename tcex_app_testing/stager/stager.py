@@ -1,4 +1,4 @@
-"""Stage Data Testing Module"""
+"""TcEx Framework Module"""
 # standard library
 import logging
 from typing import TYPE_CHECKING

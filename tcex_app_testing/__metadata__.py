@@ -1,4 +1,4 @@
-"""Package version and other metadata"""
+"""TcEx Framework Module"""
 __author__ = 'ThreatConnect (support@threatconnect.com)'
 __author_email__ = 'support@threatconnect.com'
 __description__ = 'ThreatConnect Exchange App Testing Framework'

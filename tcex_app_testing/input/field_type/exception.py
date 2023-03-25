@@ -1,4 +1,4 @@
-"""Field type exception classes"""
+"""TcEx Framework Module"""
 # standard library
 import logging
 

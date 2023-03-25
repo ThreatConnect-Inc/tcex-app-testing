@@ -1,4 +1,4 @@
-"""CLI for TCEX Testing"""
+"""TcEx Framework Module"""
 # standard library
 import logging
 import os
@@ -41,7 +41,7 @@ def create(
         tcc = Create(feature, profile_name, interactive)
 
         if config_model.test_case_profile_filename.is_file():
-            Render.render_failure_message(f'A profile with name ({profile_name}) already exists.')
+            Render.panel.failure(f'A profile with name ({profile_name}) already exists.')
 
         # generates the tests and feature dir
         tcc.create_dirs()
@@ -72,10 +72,10 @@ def create(
         row_data.extend(tcc.templates_tests.results)
 
         # render results table
-        Render.render_template_create_results(row_data, 'Test Case Create Results')
+        Render.table_file_results(row_data, 'Test Case Create Results')
     except Exception as ex:
         _logger.error(traceback.format_exc())
-        Render.render_failure_message(f'Exception: {ex}')
+        Render.panel.failure(f'Exception: {ex}')
 
 
 @app.command()
@@ -101,10 +101,10 @@ def negative(
         tcn.create_negative_profiles()
 
         # render results table
-        Render.render_template_create_results(tcn.results, 'Test Case Create Negative Results')
+        Render.table_file_results(tcn.results, 'Test Case Create Negative Results')
     except Exception as ex:
         _logger.error(traceback.format_exc())
-        Render.render_failure_message(f'Exception: {ex}')
+        Render.panel.failure(f'Exception: {ex}')
 
 
 @app.command()
@@ -127,10 +127,10 @@ def update():
             row_data.extend(tcu.templates_tests.results)
 
             # render results table
-            Render.render_template_create_results(row_data, 'Test Case Update Results')
+            Render.table_file_results(row_data, 'Test Case Update Results')
     except Exception as ex:
         _logger.error(traceback.format_exc())
-        Render.render_failure_message(f'Exception: {ex}')
+        Render.panel.failure(f'Exception: {ex}')
 
 
 if __name__ == '__main__':

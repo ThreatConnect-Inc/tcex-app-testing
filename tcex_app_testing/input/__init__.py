@@ -1,1 +1,1 @@
-"""Inputs Module"""
+"""TcEx Framework Module"""

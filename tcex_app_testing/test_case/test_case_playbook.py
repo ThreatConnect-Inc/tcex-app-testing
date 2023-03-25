@@ -1,4 +1,4 @@
-"""TcEx Playbook Test Case module"""
+"""TcEx Framework Module"""
 # standard library
 import os
 import subprocess  # nosec

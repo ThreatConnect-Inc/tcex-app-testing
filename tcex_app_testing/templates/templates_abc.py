@@ -1,19 +1,16 @@
-"""TcEx Framework Template Download/Generation Module."""
+"""TcEx Framework Module"""
 # standard library
 import logging
 import os
-import sys
 import zipfile
 
 # third-party
-import black
-import isort
-from black.report import NothingChanged
 from mako.template import Template
 
 # first-party
 from tcex_app_testing.app.config.install_json import InstallJson
 from tcex_app_testing.util import Util
+from tcex_app_testing.util.code_operation import CodeOperation
 
 # get logger
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
@@ -79,29 +76,6 @@ class TemplatesABC:
 
         return egg.read(internal_name).decode('utf-8')
 
-    @staticmethod
-    def format_code(_code):
-        """Return formatted code."""
-        # run black formatter on code
-        mode = black.FileMode(line_length=100, string_normalization=False)
-        try:
-            _code = black.format_file_contents(_code, fast=False, mode=mode)
-        except ValueError as ex:
-            print(f'Formatting of code failed {ex}.')
-            sys.exit(1)
-        except NothingChanged:
-            pass
-
-        # run isort on code
-        try:
-            isort_config = isort.Config(settings_file='setup.cfg')
-            _code = isort.code(_code, config=isort_config)
-        except Exception as ex:
-            print(f'Formatting of code failed {ex}.')
-            sys.exit(1)
-
-        return _code
-
     def render(
         self,
         template_name: str,
@@ -118,7 +92,7 @@ class TemplatesABC:
             template = Template(template_data)  # nosec
             rendered_template = template.render(**variables)
             with open(destination, 'w', encoding='utf-8') as f:
-                f.write(self.format_code(rendered_template))
+                f.write(CodeOperation.format_code(rendered_template))
             status = '[green]Success[/green]'
         else:
             status = '[yellow]Skipped[/yellow]'

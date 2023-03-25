@@ -1,4 +1,4 @@
-"""TcEx Test Module."""
+"""TcEx Framework Module"""
 # standard library
 import json
 from typing import TYPE_CHECKING, cast
@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, cast
 # first-party
 from tcex_app_testing.config_model import config_model
 from tcex_app_testing.util import Util
+from tcex_app_testing.util.code_operation import CodeOperation
 
 if TYPE_CHECKING:
     # first-party
@@ -34,7 +35,7 @@ class ProfileValidate:
         # log error for missing output data if not a fail test case (exit code of 1)
         file_link = f'{config_model.test_case_profile_filename_rel}'
 
-        line_number = self.util.find_line_number(
+        line_number = CodeOperation.find_line_number(
             needle=rf'.*{needle}.*',
             contents=self.profile.contents_raw,
             trigger_start='  "outputs": {',

@@ -1,4 +1,4 @@
-"""Trace Logger Class"""
+"""TcEx Framework Module"""
 # standard library
 import logging
 from inspect import getframeinfo, stack

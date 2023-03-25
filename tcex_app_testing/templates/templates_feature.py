@@ -1,4 +1,4 @@
-"""TcEx Framework Template Download/Generation Module."""
+"""TcEx Framework Module"""
 # standard library
 import os
 

@@ -1,3 +1,3 @@
-"""Profile module for TcEx Framework"""
+"""TcEx Framework Module"""
 
 from .profile import Profile

@@ -1,4 +1,4 @@
-"""TcEx Framework Test Generation Module."""
+"""TcEx Framework Module"""
 # standard library
 import copy
 

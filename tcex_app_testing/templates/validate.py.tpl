@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Validate App outputs Class."""
+"""TcEx Framework Module"""
 
 # pylint: disable=line-too-long
 # standard library

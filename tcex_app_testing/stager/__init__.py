@@ -1,3 +1,3 @@
-"""TcEx App Testing Framework Module"""
+"""TcEx Framework Module"""
 
 from .stager import Stager

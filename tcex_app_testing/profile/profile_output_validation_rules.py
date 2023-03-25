@@ -1,4 +1,4 @@
-"""TcEx Test Module."""
+"""TcEx Framework Module"""
 # standard library
 import hashlib
 import json

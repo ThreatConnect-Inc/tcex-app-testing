@@ -1,4 +1,4 @@
-"""Validate Data Testing Module"""
+"""TcEx Framework Module"""
 # standard library
 import logging
 from collections.abc import Callable

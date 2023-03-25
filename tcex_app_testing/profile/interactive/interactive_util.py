@@ -1,4 +1,4 @@
-"""TcEx App Testing Module."""
+"""TcEx Framework Module"""
 
 # first-party
 from tcex_app_testing.app.config.model.install_json_model import ParamsModel

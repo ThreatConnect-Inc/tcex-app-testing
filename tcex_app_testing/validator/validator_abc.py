@@ -1,4 +1,4 @@
-"""Validator Operators Module"""
+"""TcEx Framework Module"""
 # standard library
 import datetime
 import difflib
