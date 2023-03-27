@@ -1,4 +1,4 @@
-"""TcEx Framework Module"""
+"""TcEx App Testing Module"""
 # standard library
 import os
 import warnings

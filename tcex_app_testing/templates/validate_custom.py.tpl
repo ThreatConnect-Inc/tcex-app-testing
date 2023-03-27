@@ -1,4 +1,4 @@
-"""TcEx Framework Module"""
+"""TcEx App Testing Module"""
 # first-party
 from tests.validate import Validate
 

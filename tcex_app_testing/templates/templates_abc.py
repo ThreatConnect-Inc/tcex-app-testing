@@ -91,6 +91,7 @@ class TemplatesABC:
             template_data = self.get_template(template_name)
             template = Template(template_data)  # nosec
             rendered_template = template.render(**variables)
+            self.log.debug(f'template-destination={destination}')
             with open(destination, 'w', encoding='utf-8') as f:
                 f.write(CodeOperation.format_code(rendered_template))
             status = '[green]Success[/green]'

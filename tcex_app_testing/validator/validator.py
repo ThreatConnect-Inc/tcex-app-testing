@@ -128,12 +128,12 @@ class Validator(ValidatorABC):
         return operators.get(op, None)
 
     @cached_property
-    def kvstore(self) -> 'ValidatorKvstore':
+    def kvstore(self) -> ValidatorKvstore:
         """Return instance of ValidatorKvstore"""
         return ValidatorKvstore(self)
 
     @cached_property
-    def redis(self) -> 'ValidatorKvstore':
+    def redis(self) -> ValidatorKvstore:
         """Return instance of ValidatorKvstore"""
         return ValidatorKvstore(self)
 

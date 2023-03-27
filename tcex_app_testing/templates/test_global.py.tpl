@@ -1,4 +1,4 @@
-"""TcEx Framework Module"""
+"""TcEx App Testing Module"""
 
 # third-party
 from tcex_app_testing import __metadata__

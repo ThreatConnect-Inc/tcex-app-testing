@@ -75,11 +75,6 @@ class App:
         )
 
     @cached_property
-    def token(self) -> str:
-        """Return the current token."""
-        return ''
-
-    @cached_property
     def user_agent(self) -> dict[str, str]:
         """Return a User-Agent string."""
         return {

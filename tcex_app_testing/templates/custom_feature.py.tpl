@@ -1,4 +1,4 @@
-"""TcEx Framework Module"""
+"""TcEx App Testing Module"""
 # standard library
 from typing import TYPE_CHECKING
 

@@ -1,5 +1,4 @@
-# -*- coding: utf-8 -*-
-"""TcEx Framework Module"""
+"""TcEx App Testing Module"""
 
 # pylint: disable=line-too-long
 # standard library
