@@ -4,8 +4,8 @@
 from tcex_app_testing.app.config.model.install_json_model import ParamsModel
 from tcex_app_testing.config_model import config_model
 from tcex_app_testing.pleb.cached_property import cached_property
-from tcex_app_testing.requests_session.auth.tc_auth import TcAuth
-from tcex_app_testing.requests_session.tc_session import TcSession
+from tcex_app_testing.requests_tc import TcSession
+from tcex_app_testing.requests_tc.auth.tc_auth import TcAuth
 
 
 class InteractiveUtil:

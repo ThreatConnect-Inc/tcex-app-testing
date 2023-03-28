@@ -99,7 +99,7 @@ class TestCaseABC(ABC):
         if 'tcex.pleb.scoped_property' in sys.modules:
             sys.modules['tcex.pleb.scoped_property'].scoped_property._reset()
         if 'tcex.pleb.registry' in sys.modules:
-            sys.modules['tcex.pleb.registry'].registry._reset()
+            sys.modules['tcex.registry'].registry._reset()
 
         # Adding this for batch to created the -batch and errors files
         os.makedirs(os.path.join(config_model.test_case_log_test_dir, 'DEBUG'), exist_ok=True)

@@ -24,7 +24,7 @@ class TestCasePlaybook(TestCasePlaybookCommon):
             # FIXME need a better "reset tcex" mechanism
             # pylint: disable=protected-access
             if 'tcex.pleb.registry' in sys.modules:
-                sys.modules['tcex.pleb.registry'].registry._reset()
+                sys.modules['tcex.registry'].registry._reset()
 
             run = Run()
             run.setup()

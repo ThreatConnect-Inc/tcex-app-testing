@@ -1,8 +1,10 @@
 """TcEx Framework Module"""
 
+# first-party
+from tcex_app_testing.registry import registry
+
 from ..input.model.module_app_model import ModuleAppModel
 from ..pleb.cached_property import cached_property
-from ..pleb.registry import registry
 from ..pleb.scoped_property import scoped_property
 from ..util.file_operation import FileOperation
 from .config.install_json import InstallJson

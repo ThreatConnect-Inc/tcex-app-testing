@@ -13,7 +13,7 @@ from tcex_app_testing.stager.stager_kvstore import StagerKvstore
 if TYPE_CHECKING:
     # first-party
     from tcex_app_testing.app.playbook import Playbook
-    from tcex_app_testing.requests_session.tc_session import TcSession
+    from tcex_app_testing.requests_tc import TcSession
 
 # get logger
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])

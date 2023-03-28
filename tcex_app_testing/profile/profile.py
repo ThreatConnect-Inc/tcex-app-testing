@@ -18,8 +18,8 @@ from tcex_app_testing.pleb.cached_property import cached_property
 from tcex_app_testing.profile.model.profile_model import ProfileModel
 from tcex_app_testing.profile.profile_populate import ProfilePopulate
 from tcex_app_testing.render.render import Render
-from tcex_app_testing.requests_session.auth.tc_auth import TcAuth
-from tcex_app_testing.requests_session.tc_session import TcSession
+from tcex_app_testing.requests_tc import TcSession
+from tcex_app_testing.requests_tc.auth.tc_auth import TcAuth
 from tcex_app_testing.util import Util
 
 # get logger

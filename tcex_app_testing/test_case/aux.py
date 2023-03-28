@@ -24,12 +24,11 @@ from tcex_app_testing.input.model.module_app_model import ModuleAppModel
 from tcex_app_testing.input.model.module_requests_session_model import ModuleRequestsSessionModel
 from tcex_app_testing.pleb.cached_property import cached_property
 from tcex_app_testing.pleb.proxies import proxies
-from tcex_app_testing.pleb.registry import registry
 from tcex_app_testing.profile.model.profile_model import ExitMessageModel
 from tcex_app_testing.profile.profile_runner import ProfileRunner
-from tcex_app_testing.requests_session.auth.tc_auth import HmacAuth, TcAuth
-from tcex_app_testing.requests_session.requests_session import RequestsSession
-from tcex_app_testing.requests_session.tc_session import TcSession
+from tcex_app_testing.registry import registry
+from tcex_app_testing.requests_tc import RequestsTc, TcSession
+from tcex_app_testing.requests_tc.auth.tc_auth import HmacAuth, TcAuth
 from tcex_app_testing.stager import Stager
 from tcex_app_testing.util import Util
 from tcex_app_testing.validator import Validator
@@ -78,7 +77,7 @@ class Aux:
 
         # add methods to registry
         registry.add_service(App, self.app)
-        registry.add_service(RequestsSession, self.session)
+        registry.add_service(RequestsTc, self.session)
 
     def _log_inputs(self, inputs: dict[str, dict | list | str]):
         """Log inputs masking any that are marked encrypted and log warning for unknown inputs."""
@@ -301,9 +300,9 @@ class Aux:
         )
 
     @cached_property
-    def session(self) -> RequestsSession:
+    def session(self) -> RequestsTc:
         """Return requests Session object for TC admin account."""
-        return RequestsSession(self.module_requests_session_model)
+        return RequestsTc(self.module_requests_session_model)
 
     @cached_property
     def session_exchange(self) -> TcSession:
@@ -316,7 +315,7 @@ class Aux:
             tc_api_access_id=config_model.tc_api_access_id,
             tc_api_secret_key=config_model.tc_api_secret_key,
         )
-        return self.session.get_session_tc(
+        return self.session.get_session(
             auth=auth,
             base_url=config_model.tc_api_path,
             log_curl=config_model.tc_log_curl,
@@ -333,7 +332,7 @@ class Aux:
             tc_api_secret_key=config_model.tc_api_secret_key,
             tc_token=self.tc_token,
         )
-        return self.session.get_session_tc(
+        return self.session.get_session(
             auth=auth,
             base_url=config_model.tc_api_path,
             log_curl=config_model.tc_log_curl,
