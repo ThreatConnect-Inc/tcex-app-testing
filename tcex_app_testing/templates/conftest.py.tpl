@@ -10,7 +10,14 @@ from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from _pytest.main import Session
 from _pytest.python import Metafunc
-from tcex_app_testing.util.render.render import Render
+try:
+    from tcex_app_testing.util.render.render import Render
+except ImportError:
+    print(
+        'Running an App test requires the tcex-app-testing '
+        'package.\n\nPlease run "pip install tcex-app-testing".'
+    )
+    sys.exit(1)
 
 # for TcEx 4 and above, all additional packages are in the "deps" directory
 deps_dir = Path.cwd() / 'deps'
