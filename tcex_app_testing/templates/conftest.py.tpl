@@ -10,11 +10,12 @@ from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from _pytest.main import Session
 from _pytest.python import Metafunc
+from tcex_app_testing.util.render.render import Render
 
 # for TcEx 4 and above, all additional packages are in the "deps" directory
 deps_dir = Path.cwd() / 'deps'
 if not deps_dir.is_dir():
-    sys.exit(
+    Render.panel.failure(
         f'Running an App requires a "deps" directory. Could not find the {deps_dir} '
         'directory.\n\nTry running "tcex deps" to install dependencies.'
     )

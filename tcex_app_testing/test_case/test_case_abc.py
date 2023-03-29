@@ -2,7 +2,6 @@
 # standard library
 import logging
 import os
-import sys
 import traceback
 from abc import ABC
 from datetime import datetime
@@ -92,14 +91,6 @@ class TestCaseABC(ABC):
         self.log.info(
             f'step=setup-method, event=get-context, context={self.aux.tc_playbook_kvstore_context}'
         )
-
-        # clear cache, etc between test cases in tcex
-        if 'tcex.pleb.cached_property' in sys.modules:
-            sys.modules['tcex.pleb.cached_property'].cached_property._reset()
-        if 'tcex.pleb.scoped_property' in sys.modules:
-            sys.modules['tcex.pleb.scoped_property'].scoped_property._reset()
-        if 'tcex.pleb.registry' in sys.modules:
-            sys.modules['tcex.registry'].registry._reset()
 
         # Adding this for batch to created the -batch and errors files
         os.makedirs(os.path.join(config_model.test_case_log_test_dir, 'DEBUG'), exist_ok=True)
