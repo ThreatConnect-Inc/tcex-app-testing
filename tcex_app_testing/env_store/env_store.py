@@ -100,7 +100,7 @@ class EnvStore(metaclass=Singleton):
         if env_type in ['env', 'envs', 'local'] and env_value is not None:
             # return value from OS environ
             value = env_value
-        elif env_type in ['env', 'envs', 'remote'] and self.vault_client is not None:
+        elif env_type in ['env', 'envs', 'remote', 'vault'] and self.vault_client is not None:
             # return value from Vault
             value = self.read_from_vault(env_variable, default)
 

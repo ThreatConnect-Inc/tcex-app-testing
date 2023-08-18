@@ -125,7 +125,7 @@ class Registry(Container):
 
             return value
 
-        raise RuntimeError(f'No provider for type: {key}')
+        # raise RuntimeError(f'No provider for type: {key}')
 
     def _reset(self):
         """Only used during testing to reset registry."""

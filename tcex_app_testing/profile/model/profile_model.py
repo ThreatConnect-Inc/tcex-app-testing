@@ -83,6 +83,8 @@ class StageModel(BaseModel):
 
     # kvstore: Optional[Dict[str, Union[bool, List[dict], dict, List[str], str]]] = Field(
     kvstore: dict = Field({}, description='')
+    threatconnect: dict = Field({}, description='')
+    vault: dict = Field({}, description='')
 
 
 class ProfileModel(BaseModel):
@@ -109,7 +111,7 @@ class ProfileModel(BaseModel):
         runtime_levels=['playbook', 'triggerservice', 'webhooktriggerservice'],
     )
     schema_version: str = Field(
-        '1.0.0',
+        '1.0.1',
         description='The version of the profile schema.',
     )
     stage: StageModel = Field(

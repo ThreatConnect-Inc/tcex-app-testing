@@ -4,11 +4,13 @@ import json
 import logging
 import os
 import random
+import re
 import string
 import time
 from typing import Any
 from uuid import uuid4
 
+import jmespath
 # third-party
 import pytest
 import urllib3
@@ -27,6 +29,7 @@ from tcex_app_testing.pleb.proxies import proxies
 from tcex_app_testing.profile.model.profile_model import ExitMessageModel
 from tcex_app_testing.profile.profile_runner import ProfileRunner
 from tcex_app_testing.registry import registry
+from tcex_app_testing.render.render import Render
 from tcex_app_testing.requests_tc import RequestsTc, TcSession
 from tcex_app_testing.requests_tc.auth.tc_auth import HmacAuth, TcAuth
 from tcex_app_testing.stager import Stager
@@ -63,7 +66,7 @@ class Aux:
         self.skip = False
 
         # stage data tracker, used to collect and delete staged data.
-        self.staged_tc_data = []
+        self.staged_data = {}
 
         # the current kv store context, typically defined in setup_method
         # so that each test case has a unique kv store context.
@@ -258,7 +261,29 @@ class Aux:
         self._profile_runner.update.merge_inputs()
 
         # stage kvstore data based on current profile
+        self.stage_data()
+
+    def stage_data(self):
+        """Stage data for current profile."""
+        self.staged_data.update(self.stager.construct_stage_data(self._profile_runner.model.stage))
+        self.replace_variables()
         self.stager.redis.from_dict(self._profile_runner.model_resolved.stage.kvstore)
+
+    def replace_variables(self):
+        """Replace variables in profile with staged data."""
+        profile = json.dumps(self._profile_runner.model.dict())
+
+        for m in re.finditer(r'\${(.*?)}', profile):
+            full_match = str(m)
+            try:
+                full_match = m.group(0)
+                jmespath_expression = m.group(1)
+                value = jmespath.search(jmespath_expression, self.staged_data)
+                profile = profile.replace(full_match, str(value))
+            except Exception:
+                self.log.exception(f'step=run, event=replace-variables, error={full_match}')
+                Render.panel.failure(f'Invalid variable/jmespath found {full_match}.')
+        self._profile_runner.data = json.loads(profile)
 
     @property
     def is_in_collection(self):

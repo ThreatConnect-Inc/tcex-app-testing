@@ -5,7 +5,11 @@ import logging
 # first-party
 from tcex_app_testing.app.config import InstallJson
 from tcex_app_testing.config_model import config_model
+from tcex_app_testing.profile.migration.migration_1_0_0 import Migration_1_0_0
+from tcex_app_testing.profile.model import ProfileModel
+from tcex_app_testing.render.render import Render
 from tcex_app_testing.util import Util
+from packaging import version
 
 # get logger
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
@@ -22,6 +26,7 @@ class ProfileMigrate:
         self.log = _logger
         self.migrated = False
         self.util = Util()
+        self.migrations = [Migration_1_0_0]
 
     def migrate_schema(self, contents: dict) -> tuple[dict, bool]:
         """Migrate profile schema."""
@@ -31,6 +36,8 @@ class ProfileMigrate:
         # migrate any inputs that are not using variable when variable are supported. using variable
         # is the preferred method of passing data to the App during testing.
         self._migrate_schema_inputs_to_stage_kvstore(contents)
+
+        contents = self._migrate_version(contents)
 
         return contents, self.migrated
 
@@ -110,3 +117,22 @@ class ProfileMigrate:
 
                 # set migrated flag so profile will be rewritten
                 self.migrated = True
+
+    def _migrate_version(self, contents: dict):
+        desired_version = ProfileModel.__fields__.get('schema_version').default
+        desired_version = version.parse(desired_version)  # TODO: Verify we are using this lib all over
+
+        migrations = [migration(contents) for migration in self.migrations]
+        migrations = sorted(migrations, key=lambda migration: migration.start_version)
+
+        for migration in migrations:
+            current_version = version.parse(contents.get('schema_version', '1.0.0'))
+            if current_version < desired_version and current_version <= migration.start_version:
+                Render.panel.info(
+                    f'Applying migration {migration.start_version} to {migration.end_version}'
+                )
+                contents = migration.migrate(contents)
+                contents = migration.update_schema_version(contents)
+                self.migrated = True
+        return contents
+
