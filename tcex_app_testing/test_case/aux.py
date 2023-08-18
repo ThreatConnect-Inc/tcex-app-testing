@@ -10,8 +10,8 @@ import time
 from typing import Any
 from uuid import uuid4
 
-import jmespath
 # third-party
+import jmespath
 import pytest
 import urllib3
 from _pytest.config import Config
@@ -279,6 +279,14 @@ class Aux:
                 full_match = m.group(0)
                 jmespath_expression = m.group(1)
                 value = jmespath.search(jmespath_expression, self.staged_data)
+
+                if not value:
+                    self.log.error(
+                        f'step=run, event=replace-variables, error={full_match} '
+                        'could not be resolved.'
+                    )
+                    Render.panel.failure(f'Jmespath for {full_match} was invalid value: {value}.')
+
                 profile = profile.replace(full_match, str(value))
             except Exception:
                 self.log.exception(f'step=run, event=replace-variables, error={full_match}')

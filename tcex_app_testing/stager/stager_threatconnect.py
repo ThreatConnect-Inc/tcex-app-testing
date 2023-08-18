@@ -1,9 +1,10 @@
 """TcEx Framework Module"""
 # standard library
-from tcex_app_testing.render.render import Render
-from tcex_app_testing.requests_tc import TcSession
 import logging
 
+# first-party
+from tcex_app_testing.render.render import Render
+from tcex_app_testing.requests_tc import TcSession
 
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
 
@@ -17,6 +18,7 @@ class StagerThreatconnect:
         self.log = _logger
 
     def stage(self, threatconnect_data) -> dict:
+        """Stage data in ThreatConnect."""
         staged_data = {}
         for root_key, root_value in threatconnect_data.items():
             for key, data in root_value.items():
@@ -41,7 +43,7 @@ class StagerThreatconnect:
 
             error_msg = '\n'.join(error_msg)
             self.log.error(f'step=setup, event=staging-{ioc_type}-data, message={error_msg}')
-            Render.panel.warning(error_msg)
+            Render.panel.failure(error_msg)
 
         response_json = response.json()
         return response_json.get('data', response_json)

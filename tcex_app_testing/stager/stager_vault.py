@@ -3,11 +3,12 @@
 import logging
 import os
 
+# third-party
 import hvac
 from hvac.exceptions import InvalidPath, VaultError
 
-from tcex_app_testing.pleb.cached_property import cached_property
 # first-party
+from tcex_app_testing.pleb.cached_property import cached_property
 from tcex_app_testing.render.render import Render
 
 # get logger
@@ -18,6 +19,7 @@ class VaultTokenError(Exception):
     """Exception raised for errors in the Vault Token."""
 
     def __init__(self):
+        """Initialize class properties."""
         self.message = 'VAULT_TOKEN or (VAULT_ADDR or VAULT_URL) env variables not set.'
         super().__init__(self.message)
 
@@ -39,8 +41,11 @@ class StagerVault:
 
         return staged_data
 
+
+
     @cached_property
     def vault_client(self):
+        """Get the current instance of Vault Client"""
         vault_token = os.getenv('VAULT_TOKEN')
         vault_addr = os.getenv('VAULT_ADDR') or os.getenv('VAULT_URL')
 
@@ -55,7 +60,9 @@ class StagerVault:
         Args:
             url: The url to the vault data including the key (e.g. myData/mySecret).
         """
-        url = url.lstrip('/').split('/')
+        url = url.lstrip('/')
+        url = f'{self._vault_base_path}/{url}'
+        url = url.split('/')
 
         # the mount point from the path
         # (e.g., "/myData/myResource/token/" -> "myData")
@@ -77,13 +84,13 @@ class StagerVault:
             Render.panel.warning(
                 f'Error reading from Vault for path {url}. Check access and credentials.'
             )
-            self.log.error(
-                f'step=setup, event=env-store-error-reading-path, path={url}, error={e}'
-            )
+            self.log.error(f'step=setup, event=env-store-error-reading-path, path={url}, error={e}')
         except Exception as e:
-            import traceback
-            traceback.print_exc()
-            Render.panel.warning(f'Error reading from Vault for path {url}: {e}.')
             self.log.error('step=setup, event=env-store-generic-failure')
+            Render.panel.failure(f'Error reading from Vault for path {url}: {e}.')
 
         return data.get('data', data).get('data', data)
+
+    @cached_property
+    def _vault_base_path(self):
+        return os.getenv('TCEX_TEST_VAULT_BASE_PATH', '').rstrip('/').lstrip('/')

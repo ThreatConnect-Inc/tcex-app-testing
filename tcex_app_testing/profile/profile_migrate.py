@@ -2,6 +2,9 @@
 # standard library
 import logging
 
+# third-party
+from packaging import version
+
 # first-party
 from tcex_app_testing.app.config import InstallJson
 from tcex_app_testing.config_model import config_model
@@ -9,7 +12,6 @@ from tcex_app_testing.profile.migration.migration_1_0_0 import Migration_1_0_0
 from tcex_app_testing.profile.model import ProfileModel
 from tcex_app_testing.render.render import Render
 from tcex_app_testing.util import Util
-from packaging import version
 
 # get logger
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
@@ -120,7 +122,7 @@ class ProfileMigrate:
 
     def _migrate_version(self, contents: dict):
         desired_version = ProfileModel.__fields__.get('schema_version').default
-        desired_version = version.parse(desired_version)  # TODO: Verify we are using this lib all over
+        desired_version = version.parse(desired_version)
 
         migrations = [migration(contents) for migration in self.migrations]
         migrations = sorted(migrations, key=lambda migration: migration.start_version)
@@ -135,4 +137,3 @@ class ProfileMigrate:
                 contents = migration.update_schema_version(contents)
                 self.migrated = True
         return contents
-

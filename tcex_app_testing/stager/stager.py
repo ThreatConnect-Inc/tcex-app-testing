@@ -26,10 +26,10 @@ class Stager:
     """Stage Data class"""
 
     def __init__(
-            self,
-            playbook: 'Playbook',
-            redis_client: Redis,
-            tc_session: 'TcSession',
+        self,
+        playbook: 'Playbook',
+        redis_client: Redis,
+        tc_session: 'TcSession',
     ):
         """Initialize class properties"""
         self.playbook = playbook
@@ -46,6 +46,7 @@ class Stager:
 
     @property
     def threatconnect(self):
+        """Get the current instance of ThreatConnect for staging data"""
         return StagerThreatconnect(self.tc_session)
 
     @property
@@ -55,9 +56,11 @@ class Stager:
 
     @property
     def env(self):
+        """Get the current instance of Env for staging data"""
         return StagerEnv()
 
     def construct_stage_data(self, stage_model: StageModel) -> dict:
+        """Construct the stage data for the profile."""
         tc_data = self.threatconnect.stage(stage_model.threatconnect)
         env_data = self.env.stage_model_data()
         vault_data = self.vault.stage(stage_model.vault)
@@ -65,4 +68,3 @@ class Stager:
         if common_keys:
             raise ValueError(f'Duplicate Staged Key(s): {common_keys} found.')
         return {'tc': tc_data, 'env': env_data, 'vault': vault_data}
-

@@ -1,16 +1,18 @@
 """TcEx Framework Module"""
-import json
 # standard library
+import json
 import logging
 import os
 import re
-from typing import Callable
+from collections.abc import Callable
+
+# third-party
+from packaging import version
 
 # first-party
-from tcex_app_testing.profile.migration.migration import MigrationABC
-from packaging import version
-from tcex_app_testing.render.render import Render
 from tcex_app_testing.pleb.cached_property import cached_property
+from tcex_app_testing.profile.migration.migration import MigrationABC
+from tcex_app_testing.render.render import Render
 
 # get logger
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
@@ -24,9 +26,12 @@ class Migration_1_0_0(MigrationABC):
         super().__init__(content, version.parse('1.0.0'), version.parse('1.0.1'))
 
     def migrate(self, contents: dict) -> dict:
+        """Migrate profile schema."""
         # The order of these migrations sadly matter since vault variables can be env variables
         migrations: list[Callable[[dict], dict]] = [
-            self.env_migration, self.tc_migration, self.vault_migration
+            self.env_migration,
+            self.tc_migration,
+            self.vault_migration,
         ]
 
         for migration in migrations:
@@ -115,16 +120,38 @@ class Migration_1_0_0(MigrationABC):
     @property
     def _tc_groups(self):
         return [
-            'adversary', 'attack pattern', 'campaign', 'course of action', 'document', 'email',
-            'event', 'incident', 'intrusion set', 'report', 'signature', 'tactic', 'threat', 'tool',
-            'vulnerability'
+            'adversary',
+            'attack pattern',
+            'campaign',
+            'course of action',
+            'document',
+            'email',
+            'event',
+            'incident',
+            'intrusion set',
+            'report',
+            'signature',
+            'tactic',
+            'threat',
+            'tool',
+            'vulnerability',
         ]
 
     @property
     def _tc_indicators(self):
         return [
-            'address', 'email address', 'file', 'host', 'url', 'asn', 'cidr',
-            'email subject', 'hashtag', 'mutex', 'registry key', 'user agent'
+            'address',
+            'email address',
+            'file',
+            'host',
+            'url',
+            'asn',
+            'cidr',
+            'email subject',
+            'hashtag',
+            'mutex',
+            'registry key',
+            'user agent',
         ]
 
     @staticmethod
@@ -155,4 +182,3 @@ class Migration_1_0_0(MigrationABC):
     @cached_property
     def _vault_base_path(self):
         return os.getenv('TCEX_TEST_VAULT_BASE_PATH', '').rstrip('/').lstrip('/')
-

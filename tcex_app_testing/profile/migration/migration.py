@@ -26,7 +26,7 @@ class MigrationABC(ABC):
 
     @abstractmethod
     def migrate(self, contents: dict) -> dict:
-        ...
+        """Migrate profile schema."""
 
     def update_schema_version(self, contents: dict) -> dict:
         """Update the schema version in the profile."""
