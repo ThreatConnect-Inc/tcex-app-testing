@@ -41,8 +41,6 @@ class StagerVault:
 
         return staged_data
 
-
-
     @cached_property
     def vault_client(self):
         """Get the current instance of Vault Client"""
@@ -61,7 +59,8 @@ class StagerVault:
             url: The url to the vault data including the key (e.g. myData/mySecret).
         """
         url = url.lstrip('/')
-        url = f'{self._vault_base_path}/{url}'
+        if not url.startswith(self._vault_base_path):
+            url = f'{self._vault_base_path}/{url}'
         url = url.split('/')
 
         # the mount point from the path
