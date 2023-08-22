@@ -160,7 +160,7 @@ class Profile:
         return self._data
 
     @data.setter
-    def data(self, contents):
+    def data(self, contents: dict):
         """Set profile_data dict.
 
         The data object needs to be updated after TC variables are resolved. The order of
