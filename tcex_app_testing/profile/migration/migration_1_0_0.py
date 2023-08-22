@@ -86,12 +86,12 @@ class Migration_1_0_0(MigrationABC):
             transformed_tc_staged_data[root_type][key_] = value
         contents['stage']['threatconnect'] = transformed_tc_staged_data
 
-        contents = json.dumps(contents)
-        for m in re.finditer(r'\${tcenv:(.*?):(.*?)}', contents):
+        contents_ = json.dumps(contents)
+        for m in re.finditer(r'\${tcenv:(.*?):(.*?)}', contents_):
             transformed_pattern = f'${{tc.{m.group(1)}.{m.group(2)}}}'
-            contents = contents.replace(m.group(0), transformed_pattern)
+            contents_ = contents_.replace(m.group(0), transformed_pattern)
 
-        return json.loads(contents)
+        return json.loads(contents_)
 
     def _determine_tc_root_type(self, data) -> str:
         type_ = data.get('type')
@@ -166,8 +166,8 @@ class Migration_1_0_0(MigrationABC):
 
     def env_migration(self, contents: dict) -> dict:
         """Migrate env variable references"""
-        contents = json.dumps(contents)
-        for m in re.finditer(r'\${(env|envs|local|remote):(.*?)}', contents):
+        contents_ = json.dumps(contents)
+        for m in re.finditer(r'\${(env|envs|local|remote):(.*?)}', contents_):
             full_match = m.group(0)
             key_ = m.group(2).lower()
             if self._check_default_value_unsupported(key_, full_match):
@@ -176,8 +176,8 @@ class Migration_1_0_0(MigrationABC):
                 continue
 
             transformed_key = f'${{env.{key_}}}'
-            contents = contents.replace(full_match, transformed_key)
-        return json.loads(contents)
+            contents_ = contents_.replace(full_match, transformed_key)
+        return json.loads(contents_)
 
     @cached_property
     def _vault_base_path(self):

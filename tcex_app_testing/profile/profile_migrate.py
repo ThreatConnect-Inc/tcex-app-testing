@@ -121,8 +121,14 @@ class ProfileMigrate:
                 self.migrated = True
 
     def _migrate_version(self, contents: dict):
-        desired_version = ProfileModel.__fields__.get('schema_version').default
-        desired_version = version.parse(desired_version)
+        """Migrate profile schema."""
+        desired_version = None
+        try:
+            desired_version = ProfileModel.__fields__.get('schema_version').default  # type: ignore
+            desired_version = version.parse(desired_version)
+        except Exception:
+            self.log.error('Unable to parse desired version from ProfileModel.')
+            Render.panel.failure('Unable to parse desired version from ProfileModel.')
 
         migrations = [migration(contents) for migration in self.migrations]
         migrations = sorted(migrations, key=lambda migration: migration.start_version)

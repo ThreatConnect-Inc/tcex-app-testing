@@ -61,15 +61,15 @@ class StagerVault:
         url = url.lstrip('/')
         if not url.startswith(self._vault_base_path):
             url = f'{self._vault_base_path}/{url}'
-        url = url.split('/')
+        url_ = url.split('/')
 
         # the mount point from the path
         # (e.g., "/myData/myResource/token/" -> "myData")
-        mount_point = url[0]
+        mount_point = url_[0]
 
         # the path with the key and mount point removed
         # (e.g., "/myData/myResource/token/" -> "myResource")
-        url = '/'.join(url[1:])
+        url = '/'.join(url_[1:])
 
         data = {}
         try:
