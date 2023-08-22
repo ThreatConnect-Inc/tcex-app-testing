@@ -48,18 +48,8 @@ class TemplatesTests(TemplatesABC):
         self.init_py()
         self.conftest_py()
         self.custom_py()
-        self.test_global_py()
         self.validate_py()
         self.validate_custom_py()
-
-    def test_global_py(self):
-        """Render template file."""
-        filename = 'test_global.py'
-        self.log.info(f'Rendering {filename} template to {config_model.test_case_dir}')
-
-        # render the template
-        fqfn = os.path.join(config_model.test_case_dir, filename)
-        self.render(f'{filename}.tpl', fqfn, overwrite=True)
 
     def validate_py(self):
         """Render the validate.py template."""

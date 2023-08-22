@@ -1,5 +1,7 @@
 # Release Notes
 
-### 0.0.1
+### 1.0.1
 
-    -   Initial public release of TcEx App testing framework.
+### 1.0.0
+
+-   Initial public release of TcEx App testing framework.
