@@ -25,6 +25,7 @@ dependencies = [
   "hvac",
   "inflect",
   "isort",
+  "jmespath",
   "mako",
   "paho-mqtt",
   "pyaes",
