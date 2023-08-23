@@ -72,23 +72,41 @@ class Migration_1_0_0(MigrationABC):
         path = '/'.join(path[:-1])
         return key_, value, path
 
+    @staticmethod
+    def _transform_tc_staged_data(data: dict) -> dict:
+        """Transform tc staged data to match the new format."""
+        keys_of_interest = ['tags', 'attributes', 'securityLabels']
+        for key_ in keys_of_interest:
+            if key_ in data and isinstance(data[key_], list):
+                data[key_]['data'] = data[key_]
+
+        return data
+
     def tc_migration(self, contents: dict) -> dict:
         """Migrate staged tc data and its variable references"""
 
         contents.setdefault('stage', {}).setdefault('threatconnect', {})
         original_tc_staged_data = contents['stage']['threatconnect'].copy()
         transformed_tc_staged_data = {}
+        key_root_type_map = {}
         for key_, value in original_tc_staged_data.items():
             root_type = self._determine_tc_root_type(value)
             if root_type in ['victims', 'cases', 'notes', 'artifacts']:
                 value.pop('type')
             transformed_tc_staged_data.setdefault(root_type, {})
+            value = self._transform_tc_staged_data(value)
             transformed_tc_staged_data[root_type][key_] = value
+            key_root_type_map[key_] = root_type
         contents['stage']['threatconnect'] = transformed_tc_staged_data
 
         contents_ = json.dumps(contents)
         for m in re.finditer(r'\${tcenv:(.*?):(.*?)}', contents_):
-            transformed_pattern = f'${{tc.{m.group(1)}.{m.group(2)}}}'
+            key_ = m.group(1)
+            jmespath_ = m.group(2)
+            root_type = key_root_type_map.get(key_)
+            if not root_type:
+                Render.panel.failure(f'Unable to determine root type for TC data: {m.group(0)})')
+            transformed_pattern = f'${{tc.{root_type}.{key_}.{jmespath_}}}'
             contents_ = contents_.replace(m.group(0), transformed_pattern)
 
         return json.loads(contents_)
@@ -97,7 +115,8 @@ class Migration_1_0_0(MigrationABC):
         type_ = data.get('type')
         if not type_:
             Render.panel.warning(f'Unable to determine root type for TC data: {data}')
-        type_ = type_.lstrip('ti_').lstrip('cm_')
+        type_ = type_.lstrip('ti_').lstrip('cm_').lstrip('TI_').lstrip('CM_')
+        data['type'] = type_
 
         match type_.lower():
             case type_ if type_ in self._tc_groups:
@@ -106,6 +125,7 @@ class Migration_1_0_0(MigrationABC):
                 return 'indicators'
             case 'task':
                 if 'name' in data:
+                    data.pop('type')
                     return 'tasks'
                 return 'groups'
             case type_ if type_ in ['artifact', 'case', 'note', 'victim']:

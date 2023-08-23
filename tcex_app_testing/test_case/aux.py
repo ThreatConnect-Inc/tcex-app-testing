@@ -285,6 +285,7 @@ class Aux:
                         f'step=run, event=replace-variables, error={full_match} '
                         'could not be resolved.'
                     )
+                    print(self.staged_data)
                     Render.panel.failure(f'Jmespath for {full_match} was invalid value: {value}.')
 
                 profile = profile.replace(full_match, str(value))
@@ -331,6 +332,10 @@ class Aux:
             proxy_user=config_model.tc_proxy_username,
             proxy_pass=config_model.tc_proxy_password,
         )
+
+    def cleanup(self):
+        """Cleanup staged data."""
+        self.stager.threatconnect.cleanup(self.staged_data.get('tc'))
 
     @cached_property
     def session(self) -> RequestsTc:

@@ -21,17 +21,19 @@ class StagerThreatconnect:
         """Stage data in ThreatConnect."""
         staged_data = {}
         for root_key, root_value in threatconnect_data.items():
+            staged_data.setdefault(root_key, {})
             for key, data in root_value.items():
                 if key in staged_data:
                     raise RuntimeError(f'ThreatConnect variable {key} is already staged.')
-                staged_data[f'{key}'] = self.stage_data(root_key, data)
+                staged_data[root_key][f'{key}'] = self.stage_data(root_key, data)
 
         return staged_data
 
     def stage_data(self, ioc_type, data):
         """Stage data in ThreatConnect."""
         self.session.log_curl = True
-        response = self.session.post(f'/v3/{ioc_type}', json=data)
+        params = {'fields': ['attributes', 'tags', 'securityLabels']}
+        response = self.session.post(f'/v3/{ioc_type}', json=data, params=params)
         if not response.ok:
             error_msg = [
                 f'Error staging data: {data}',
@@ -47,3 +49,11 @@ class StagerThreatconnect:
 
         response_json = response.json()
         return response_json.get('data', response_json)
+
+    def cleanup(self, staged_data: dict):
+        """Cleanup staged data in ThreatConnect."""
+        for root_key, root_value in staged_data.items():
+            for data in root_value.values():
+                response = self.session.delete(f'''/v3/{root_key}/{data.get('id')}''')
+                if not response.ok:
+                    print(f'Failed to cleanup {root_key}: {data}')
