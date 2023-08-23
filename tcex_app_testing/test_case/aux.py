@@ -335,7 +335,7 @@ class Aux:
 
     def cleanup(self):
         """Cleanup staged data."""
-        self.stager.threatconnect.cleanup(self.staged_data.get('tc'))
+        self.stager.threatconnect.cleanup(self.staged_data.get('tc', {}))
 
     @cached_property
     def session(self) -> RequestsTc:
