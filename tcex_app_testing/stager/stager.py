@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 # third-party
 from redis import Redis
 
+from tcex_app_testing.pleb.cached_property import cached_property
 # first-party
 from tcex_app_testing.profile.model.profile_model import StageModel
 from tcex_app_testing.stager.stager_env import StagerEnv
@@ -39,22 +40,22 @@ class Stager:
         # properties
         self.log = _logger
 
-    @property
+    @cached_property
     def redis(self):
         """Get the current instance of Redis for staging data"""
         return StagerKvstore(self.playbook, self.redis_client)
 
-    @property
+    @cached_property
     def threatconnect(self):
         """Get the current instance of ThreatConnect for staging data"""
         return StagerThreatconnect(self.tc_session)
 
-    @property
+    @cached_property
     def vault(self):
         """Get the current instance of Vault for staging data"""
         return StagerVault()
 
-    @property
+    @cached_property
     def env(self):
         """Get the current instance of Env for staging data"""
         return StagerEnv()
