@@ -6,8 +6,8 @@ from typing import TYPE_CHECKING
 # third-party
 from redis import Redis
 
-from tcex_app_testing.pleb.cached_property import cached_property
 # first-party
+from tcex_app_testing.pleb.cached_property import cached_property
 from tcex_app_testing.profile.model.profile_model import StageModel
 from tcex_app_testing.stager.stager_env import StagerEnv
 from tcex_app_testing.stager.stager_kvstore import StagerKvstore
