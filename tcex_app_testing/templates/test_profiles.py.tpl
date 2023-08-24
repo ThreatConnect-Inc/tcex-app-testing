@@ -60,40 +60,42 @@ class TestProfiles(${class_name}):
             pytestconfig=pytestconfig,
         )
 
-        # run custom test method before run method
-        self.custom.test_pre_run(
-            self, self.aux.profile_runner.data, monkeypatch if self.run_method == 'inline' else None
-        )
-
-        assert self.run_profile() in self.aux.profile_runner.model.exit_codes
-
-        # run custom test method before validation
-        self.custom.test_pre_validate(self, self.aux.profile_runner.data)
-
-        # get Validation instance
-        validation = ValidateFeature(self.aux.validator)
-
-        # validate App outputs and Profile outputs are consistent
-        if self.aux.profile_runner.pytest_args_model.updated is True:
-            msg = 'Profile was updated during this run. Please rerun test profile.'
-            warnings.warn(msg)
-            pytest.xfail(msg)
-        elif self.aux.profile_runner.model.initialized is False:
-            msg = 'Profile was not initialized during this run. Please rerun test profile.'
-            warnings.warn(msg)
-            pytest.xfail(msg)
-        else:
-            validation.validate_outputs(
-                self.aux.profile_runner.tc_playbook_out_variables,
-                self.aux.profile_runner.model.outputs,
+        try:
+            # run custom test method before run method
+            self.custom.test_pre_run(
+                self, self.aux.profile_runner.data, monkeypatch if self.run_method == 'inline' else None
             )
 
-            # validate App outputs with Profile outputs
-            validation.validate(self.aux.profile_runner.model.outputs)
+            assert self.run_profile() in self.aux.profile_runner.model.exit_codes
 
-            # validate exit message
-            if self.aux.profile_runner.model.exit_message:
-                self.aux.validate_exit_message(self.aux.profile_runner.model.exit_message)
+            # run custom test method before validation
+            self.custom.test_pre_validate(self, self.aux.profile_runner.data)
 
-        # cleanup staged data
-        self.aux.cleanup()
+            # get Validation instance
+            validation = ValidateFeature(self.aux.validator)
+
+            # validate App outputs and Profile outputs are consistent
+            if self.aux.profile_runner.pytest_args_model.updated is True:
+                msg = 'Profile was updated during this run. Please rerun test profile.'
+                warnings.warn(msg)
+                pytest.xfail(msg)
+            elif self.aux.profile_runner.model.initialized is False:
+                msg = 'Profile was not initialized during this run. Please rerun test profile.'
+                warnings.warn(msg)
+                pytest.xfail(msg)
+            else:
+                validation.validate_outputs(
+                    self.aux.profile_runner.tc_playbook_out_variables,
+                    self.aux.profile_runner.model.outputs,
+                )
+
+                # validate App outputs with Profile outputs
+                validation.validate(self.aux.profile_runner.model.outputs)
+
+                # validate exit message
+                if self.aux.profile_runner.model.exit_message:
+                    self.aux.validate_exit_message(self.aux.profile_runner.model.exit_message)
+
+        finally:
+            # cleanup staged data
+            self.aux.cleanup()

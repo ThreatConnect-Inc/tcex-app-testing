@@ -53,6 +53,7 @@ class StagerThreatconnect:
     def cleanup(self, staged_data: dict):
         """Cleanup staged data in ThreatConnect."""
         for root_key, root_value in staged_data.items():
+            print(f'Cleaning up {root_key}: {root_value}')
             for data in root_value.values():
                 response = self.session.delete(f'''/v3/{root_key}/{data.get('id')}''')
                 if not response.ok:
