@@ -1,6 +1,7 @@
 """TcEx Framework Module"""
 # standard library
 import logging
+from collections import namedtuple
 
 # first-party
 from tcex_app_testing.render.render import Render
@@ -39,8 +40,8 @@ class StagerThreatconnect:
                 f'Error staging data: {data}',
                 f'Url: {response.request.url}',
                 f'Method: {response.request.method}',
-                f'Response: {response.text}',
-                f'Response: {response.status_code}',
+                f'Text: {response.text}',
+                f'Status Code: {response.status_code}',
             ]
 
             error_msg = '\n'.join(error_msg)
