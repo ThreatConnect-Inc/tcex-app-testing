@@ -94,3 +94,6 @@ class TestProfiles(${class_name}):
             # validate exit message
             if self.aux.profile_runner.model.exit_message:
                 self.aux.validate_exit_message(self.aux.profile_runner.model.exit_message)
+
+        # cleanup staged data
+        self.aux.cleanup()
