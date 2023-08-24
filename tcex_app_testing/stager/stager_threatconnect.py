@@ -1,7 +1,6 @@
 """TcEx Framework Module"""
 # standard library
 import logging
-from collections import namedtuple
 
 # first-party
 from tcex_app_testing.render.render import Render

@@ -140,6 +140,7 @@ class Migration_1_0_0(MigrationABC):
         for prefix in prefixes_to_remove:
             if type_lower.startswith(prefix):
                 type_ = type_[len(prefix) :]
+                data['type'] = type_
                 break
 
         match type_.lower():
