@@ -176,7 +176,7 @@ class Migration_1_0_0(MigrationABC):
             'threat',
             'tool',
             'vulnerability',
-            'task'
+            'task',
         ]
 
     @property
