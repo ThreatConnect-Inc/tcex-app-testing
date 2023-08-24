@@ -4,6 +4,7 @@ import json
 import logging
 import os
 import re
+from collections import namedtuple
 from collections.abc import Callable
 
 # third-party
@@ -29,8 +30,8 @@ class Migration_1_0_0(MigrationABC):
         """Migrate profile schema."""
         # The order of these migrations sadly matter since vault variables can be env variables
         migrations: list[Callable[[dict], dict]] = [
-            # self.env_migration,
-            # self.tc_migration,
+            self.env_migration,
+            self.tc_migration,
             self.vault_migration,
         ]
 
@@ -79,10 +80,24 @@ class Migration_1_0_0(MigrationABC):
     @staticmethod
     def _transform_tc_staged_data(data: dict) -> dict:
         """Transform tc staged data to match the new format."""
-        keys_of_interest = ['tags', 'attributes', 'securityLabels']
-        for key_ in keys_of_interest:
-            if key_ in data and isinstance(data[key_], list):
-                data[key_]['data'] = data[key_]
+        Transformation = namedtuple('Transformation', ['key', 'label'])
+        transformations = [
+            Transformation(key='tags', label='name'),
+            Transformation(key='securityLabels', label='name'),
+            Transformation(key='attributes', label=None),
+        ]
+
+        if 'owner' in data:
+            data['ownerName'] = data.pop('owner')
+
+        for transformation in transformations:
+            key_ = transformation.key
+            label = transformation.label
+            if isinstance(data.get(key_, {}), list):
+                if label:
+                    data[key_] = {'data': [{label: value} for value in data[key_]]}
+                else:
+                    data[key_] = {'data': data[key_]}
 
         return data
 
@@ -119,19 +134,19 @@ class Migration_1_0_0(MigrationABC):
         type_ = data.get('type')
         if not type_:
             Render.panel.warning(f'Unable to determine root type for TC data: {data}')
-        type_ = type_.lstrip('ti_').lstrip('cm_').lstrip('TI_').lstrip('CM_')
-        data['type'] = type_
+        type_lower = type_.lower()
+        prefixes_to_remove = ['ti_', 'cm_']
+
+        for prefix in prefixes_to_remove:
+            if type_lower.startswith(prefix):
+                type_ = type_[len(prefix) :]
+                break
 
         match type_.lower():
             case type_ if type_ in self._tc_groups:
                 return 'groups'
             case type_ if type_ in self._tc_indicators:
                 return 'indicators'
-            case 'task':
-                if 'name' in data:
-                    data.pop('type')
-                    return 'tasks'
-                return 'groups'
             case type_ if type_ in ['artifact', 'case', 'note', 'victim']:
                 return f'{type_}s'
             case _:
@@ -151,6 +166,7 @@ class Migration_1_0_0(MigrationABC):
             'document',
             'email',
             'event',
+            'malware',
             'incident',
             'intrusion set',
             'report',
@@ -159,6 +175,7 @@ class Migration_1_0_0(MigrationABC):
             'threat',
             'tool',
             'vulnerability',
+            'task'
         ]
 
     @property

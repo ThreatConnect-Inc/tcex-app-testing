@@ -142,4 +142,5 @@ class ProfileMigrate:
                 contents = migration.migrate(contents)
                 contents = migration.update_schema_version(contents)
                 self.migrated = True
+
         return contents
