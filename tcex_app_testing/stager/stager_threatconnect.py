@@ -56,4 +56,9 @@ class StagerThreatconnect:
             for data in root_value.values():
                 response = self.session.delete(f'''/v3/{root_key}/{data.get('id')}''')
                 if not response.ok:
-                    print(f'Failed to cleanup {root_key}: {data}')
+                    Render.panel.error(f'Failed to cleanup data {data} in ThreatConnect.')
+                    self.log.error(
+                        f'step=cleanup, '
+                        f'event=cleanup-{root_key}-data, '
+                        f'message=Failed to cleanup data {data} in ThreatConnect.'
+                    )

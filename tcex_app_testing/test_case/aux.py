@@ -278,6 +278,7 @@ class Aux:
             try:
                 full_match = m.group(0)
                 jmespath_expression = m.group(1)
+                jmespath_expression = jmespath_expression.encode().decode('unicode_escape')
                 value = jmespath.search(jmespath_expression, self.staged_data)
 
                 if not value:
@@ -285,7 +286,6 @@ class Aux:
                         f'step=run, event=replace-variables, error={full_match} '
                         'could not be resolved.'
                     )
-                    print(self.staged_data)
                     Render.panel.failure(f'Jmespath for {full_match} was invalid value: {value}.')
 
                 profile = profile.replace(full_match, str(value))

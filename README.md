@@ -11,6 +11,7 @@ The TcEx App testing framework provides functionality for using pytest to test T
  * hvac (https://pypi.org/project/hvac/)
  * inflect (https://pypi.python.org/pypi/inflect)
  * isort (https://pypi.org/project/isort/)
+ * jmespath (https://pypi.org/project/jmespath/)
  * mako (https://pypi.org/project/mako/)
  * pyaes (https://pypi.org/project/pyaes/)
  * pydantic (https://pypi.org/project/pydantic/)

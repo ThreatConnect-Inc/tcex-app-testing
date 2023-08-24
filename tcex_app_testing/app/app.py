@@ -81,7 +81,7 @@ class App:
         """Return a User-Agent string."""
         return {
             'User-Agent': (
-                f'TcExAppTesting/{__import__(__name__).__version__}, '
+                f'TcExAppTesting/1.0.0, '
                 f'{self.ij.model.display_name}/{self.ij.model.program_version}'
             )
         }

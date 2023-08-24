@@ -77,13 +77,13 @@ class StagerVault:
                 path=url, mount_point=mount_point
             )
         except InvalidPath:
-            Render.panel.warning(f'Error reading from Vault for path {url}. Path was not found.')
             self.log.error(f'step=setup, event=env-store-invalid-path, path={url}')
+            Render.panel.failure(f'Error reading from Vault for path {url}. Path was not found.')
         except VaultError as e:
-            Render.panel.warning(
+            self.log.error(f'step=setup, event=env-store-error-reading-path, path={url}, error={e}')
+            Render.panel.failure(
                 f'Error reading from Vault for path {url}. Check access and credentials.'
             )
-            self.log.error(f'step=setup, event=env-store-error-reading-path, path={url}, error={e}')
         except Exception as e:
             self.log.error('step=setup, event=env-store-generic-failure')
             Render.panel.failure(f'Error reading from Vault for path {url}: {e}.')

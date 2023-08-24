@@ -29,8 +29,8 @@ class Migration_1_0_0(MigrationABC):
         """Migrate profile schema."""
         # The order of these migrations sadly matter since vault variables can be env variables
         migrations: list[Callable[[dict], dict]] = [
-            self.env_migration,
-            self.tc_migration,
+            # self.env_migration,
+            # self.tc_migration,
             self.vault_migration,
         ]
 
@@ -44,7 +44,7 @@ class Migration_1_0_0(MigrationABC):
         transformation_tracker = {}
         for m in re.finditer(r'\${(env|envs|remote|vault):(.*?)}', contents_str):
             full_match = m.group(0)
-            key_ = m.group(2).lower()
+            key_ = m.group(2)
             if self._check_default_value_unsupported(key_, full_match):
                 continue
             if not key_.startswith('/'):
@@ -69,6 +69,10 @@ class Migration_1_0_0(MigrationABC):
         path = path.split('/')
         key_ = path[-2].replace(' ', '_').lower()
         value = path[-1]
+
+        if ' ' in value:
+            value = f'''\\"{value}\\"'''
+
         path = '/'.join(path[:-1])
         return key_, value, path
 
