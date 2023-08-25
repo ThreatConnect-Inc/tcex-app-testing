@@ -1,9 +1,6 @@
 [submodule "tcex_app_testing/util"]
 	path = tcex_app_testing/util
 	url = git@github.com:ThreatConnect-Inc/tcex-util.git
-[submodule "tcex_app_testing/requests_session"]
-	path = tcex_app_testing/requests_session
-	url = git@github.com:ThreatConnect-Inc/tcex-requests-session.git
 [submodule "tcex_app_testing/pleb"]
 	path = tcex_app_testing/pleb
 	url = git@github.com:ThreatConnect-Inc/tcex-pleb.git
