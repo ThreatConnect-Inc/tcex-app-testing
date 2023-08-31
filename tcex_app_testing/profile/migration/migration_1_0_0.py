@@ -78,17 +78,18 @@ class Migration_1_0_0(MigrationABC):
         return key_, value, path
 
     @staticmethod
-    def _transform_tc_staged_data(data: dict) -> dict:
+    def _transform_tc_staged_data(root_type, data: dict) -> dict:
         """Transform tc staged data to match the new format."""
         Transformation = namedtuple('Transformation', ['key', 'label'])
         transformations = [
             Transformation(key='tags', label='name'),
-            Transformation(key='securityLabels', label='name'),
             Transformation(key='attributes', label=None),
+            Transformation(key='securityLabels', label='name')
         ]
 
-        if 'owner' in data:
-            data['ownerName'] = data.pop('owner')
+        owner = data.pop('owner')
+        if root_type not in ['cases', 'notes', 'artifacts'] and owner:
+            data['ownerName'] = owner
 
         for transformation in transformations:
             key_ = transformation.key
@@ -113,7 +114,7 @@ class Migration_1_0_0(MigrationABC):
             if root_type in ['victims', 'cases', 'notes', 'artifacts']:
                 value.pop('type')
             transformed_tc_staged_data.setdefault(root_type, {})
-            value = self._transform_tc_staged_data(value)
+            value = self._transform_tc_staged_data(root_type, value)
             transformed_tc_staged_data[root_type][key_] = value
             key_root_type_map[key_] = root_type
         contents['stage']['threatconnect'] = transformed_tc_staged_data

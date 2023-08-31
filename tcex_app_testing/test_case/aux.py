@@ -78,6 +78,9 @@ class Aux:
         # instance of util method
         self.util = Util()
 
+        # Setting config model so it can be accessed in custom test files.
+        self.config_model = config_model
+
         # add methods to registry
         registry.add_service(App, self.app)
         registry.add_service(RequestsTc, self.session)
@@ -271,7 +274,9 @@ class Aux:
 
     def replace_variables(self):
         """Replace variables in profile with staged data."""
-        profile = json.dumps(self._profile_runner.model.dict())
+        profile_dict = self._profile_runner.model.dict()
+        outputs_section = profile_dict.pop('outputs', {})
+        profile = json.dumps(profile_dict)
 
         for m in re.finditer(r'\${(.*?)}', profile):
             full_match = str(m)
@@ -292,7 +297,9 @@ class Aux:
             except Exception:
                 self.log.exception(f'step=run, event=replace-variables, error={full_match}')
                 Render.panel.failure(f'Invalid variable/jmespath found {full_match}.')
-        self._profile_runner.data = json.loads(profile)
+        profile_dict = json.loads(profile)
+        profile_dict['outputs'] = outputs_section
+        self._profile_runner.data = profile_dict
 
     @property
     def is_in_collection(self):

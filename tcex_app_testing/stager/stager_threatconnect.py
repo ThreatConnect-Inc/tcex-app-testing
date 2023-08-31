@@ -32,7 +32,9 @@ class StagerThreatconnect:
     def stage_data(self, ioc_type, data):
         """Stage data in ThreatConnect."""
         self.session.log_curl = True
-        params = {'fields': ['attributes', 'tags', 'securityLabels']}
+        params = {'fields': ['attributes', 'tags']}
+        if ioc_type not in ['cases', 'notes', 'artifacts']:
+            params['fields'].append('securityLabels')
         response = self.session.post(f'/v3/{ioc_type}', json=data, params=params)
         if not response.ok:
             error_msg = [
