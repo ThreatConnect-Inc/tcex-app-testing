@@ -84,7 +84,7 @@ class Migration_1_0_0(MigrationABC):
         transformations = [
             Transformation(key='tags', label='name'),
             Transformation(key='attributes', label=None),
-            Transformation(key='securityLabels', label='name')
+            Transformation(key='securityLabels', label='name'),
         ]
 
         owner = data.pop('owner')
