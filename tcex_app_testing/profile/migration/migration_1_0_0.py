@@ -78,7 +78,7 @@ class Migration_1_0_0(MigrationABC):
         return key_, value, path
 
     @staticmethod
-    def _transform_tc_staged_data(root_type, data: dict) -> dict:
+    def _transform_tc_staged_data(root_type: str, data: dict) -> dict:
         """Transform tc staged data to match the new format."""
         Transformation = namedtuple('Transformation', ['key', 'label'])
         transformations = [
