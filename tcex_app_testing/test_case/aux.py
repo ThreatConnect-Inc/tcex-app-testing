@@ -78,6 +78,9 @@ class Aux:
         # instance of util method
         self.util = Util()
 
+        # Setting config model so it can be accessed in custom test files.
+        self.config_model = config_model
+
         # add methods to registry
         registry.add_service(App, self.app)
         registry.add_service(RequestsTc, self.session)
@@ -157,25 +160,6 @@ class Aux:
         for cache in ['app_inputs_default', 'playbook', 'stager', 'validator']:
             if cache in self.__dict__:
                 del self.__dict__[cache]
-
-    # @property
-    # def config(self) -> Config:
-    #     """Return config object."""
-    #     # if self.is_in_collection is True:
-    #     #     return None
-
-    #     return self.config_cached
-
-    # @cached_property
-    # def config_cached(self):
-    #     """Return config object."""
-    #     # the tcex_testing config, including default args as well as other configuration.
-    #     _config = Config()  # type: ignore
-
-    #     # log one type config items
-    #     self.log.info(f'step=setup, data=os-environments, environments={_config.os_environments}')
-
-    #     return _config
 
     def create_config(self, inputs: dict[str, Any]):
         """Create files necessary to start a Service App."""
@@ -263,15 +247,58 @@ class Aux:
         # stage kvstore data based on current profile
         self.stage_data()
 
+    def stage_and_replace(self, stage_key, data, stage_function, fail_on_error=True):
+        """Stage and replace data."""
+        if data is not None:
+            staged_data = stage_function(data)
+        else:
+            staged_data = stage_function()
+        self.staged_data.update({stage_key: staged_data})
+        self.replace_variables(fail_on_error=fail_on_error)
+
     def stage_data(self):
         """Stage data for current profile."""
-        self.staged_data.update(self.stager.construct_stage_data(self._profile_runner.model.stage))
-        self.replace_variables()
+        self.stage_and_replace('env', None, self.stager.env.stage_model_data, fail_on_error=False)
+        vault_data = self._profile_runner.data.get('stage', {}).get('vault', {})
+        self.stage_and_replace('vault', vault_data, self.stager.vault.stage, fail_on_error=False)
+        tc_data = self._profile_runner.data.get('stage', {}).get('threatconnect', {})
+        self.stage_and_replace('tc', tc_data, self.stager.threatconnect.stage, fail_on_error=True)
         self.stager.redis.from_dict(self._profile_runner.model_resolved.stage.kvstore)
 
-    def replace_variables(self):
+    def log_staged_data(self):
+        """Log staged data."""
+        staged_data = ['----Staged Data Keys----']
+        for key, value in self.staged_data.items():
+            staged_data.append(f'---{key}---')
+            if key.lower() == 'env':
+                staged_data.extend(sorted(list(value.keys())))
+            else:
+                value = self.flatten_dict(value)
+                value = sorted(list({key_ for key_, value_ in value.items() if value_}))
+                staged_data.extend(value)
+        self.log.info('step=run, event=staged-data')
+        self.log.info('\n'.join(staged_data))
+        Render.panel.info('\n'.join(staged_data))
+
+    def flatten_dict(self, d, parent_key='', separator='.') -> dict:
+        """Flatten a nested dictionary."""
+        items = []
+        for key, value in d.items():
+            new_key = f'{parent_key}{separator}{key}' if parent_key else key
+            if isinstance(value, dict):
+                items.extend(self.flatten_dict(value, new_key, separator=separator).items())
+            else:
+                items.append((new_key, value))
+        return dict(items)
+
+    def replace_variables(self, fail_on_error=True, prefixes=None):
         """Replace variables in profile with staged data."""
-        profile = json.dumps(self._profile_runner.model.dict())
+        if prefixes is None:
+            prefixes = ['env', 'tc', 'vault']
+
+        profile_dict = self._profile_runner.model.dict()
+        outputs_section = profile_dict.pop('outputs', {})
+        profile = json.dumps(profile_dict)
 
         for m in re.finditer(r'\${(.*?)}', profile):
             full_match = str(m)
@@ -279,9 +306,17 @@ class Aux:
                 full_match = m.group(0)
                 jmespath_expression = m.group(1)
                 jmespath_expression = jmespath_expression.encode().decode('unicode_escape')
+
+                if not any(jmespath_expression.startswith(f'{prefix}.') for prefix in prefixes):
+                    continue
+
                 value = jmespath.search(jmespath_expression, self.staged_data)
 
+                if not value and not fail_on_error:
+                    continue
+
                 if not value:
+                    self.log_staged_data()
                     self.log.error(
                         f'step=run, event=replace-variables, error={full_match} '
                         'could not be resolved.'
@@ -290,14 +325,13 @@ class Aux:
 
                 profile = profile.replace(full_match, str(value))
             except Exception:
-                self.log.exception(f'step=run, event=replace-variables, error={full_match}')
-                Render.panel.failure(f'Invalid variable/jmespath found {full_match}.')
-        self._profile_runner.data = json.loads(profile)
-
-    @property
-    def is_in_collection(self):
-        """Return True if test case is in collection."""
-        return os.getenv('PYTEST_IN_COLLECTION', 'False') == 'True'
+                self.log_staged_data()
+                if fail_on_error:
+                    self.log.exception(f'step=run, event=replace-variables, error={full_match}')
+                    Render.panel.failure(f'Invalid variable/jmespath found {full_match}.')
+        profile_dict = json.loads(profile)
+        profile_dict['outputs'] = outputs_section
+        self._profile_runner.data = profile_dict
 
     @cached_property
     def module_app_model(self) -> ModuleAppModel:
@@ -388,9 +422,6 @@ class Aux:
     @property
     def tc_token(self):
         """Return a valid API token."""
-        if self.is_in_collection is True:
-            return None
-
         if config_model.tc_api_path is None:  # no API path, no token
             return None
 

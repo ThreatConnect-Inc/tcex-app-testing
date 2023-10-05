@@ -17,6 +17,9 @@ class StagerThreatconnect:
         self.session = session
         self.log = _logger
 
+        # available fields for different types of tc endpoints
+        self.fields = {}
+
     def stage(self, threatconnect_data) -> dict:
         """Stage data in ThreatConnect."""
         staged_data = {}
@@ -32,7 +35,8 @@ class StagerThreatconnect:
     def stage_data(self, ioc_type, data):
         """Stage data in ThreatConnect."""
         self.session.log_curl = True
-        params = {'fields': ['attributes', 'tags', 'securityLabels']}
+
+        params = {'fields': self.get_fields(ioc_type)}
         response = self.session.post(f'/v3/{ioc_type}', json=data, params=params)
         if not response.ok:
             error_msg = [
@@ -49,6 +53,16 @@ class StagerThreatconnect:
 
         response_json = response.json()
         return response_json.get('data', response_json)
+
+    def get_fields(self, type_):
+        """Return fields for the provided type."""
+        fields = self.fields.get(type_.lower(), [])
+        if fields:
+            return fields
+        response = self.session.options(f'/v3/{type_}/fields', params={})
+        fields = [field.get('name') for field in response.json().get('data', [])]
+        self.fields[type_.lower()] = fields
+        return fields
 
     def cleanup(self, staged_data: dict):
         """Cleanup staged data in ThreatConnect."""

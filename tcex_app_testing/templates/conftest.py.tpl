@@ -9,7 +9,6 @@ from pathlib import Path
 # third-party
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
-from _pytest.main import Session
 from _pytest.python import Metafunc
 
 
@@ -66,18 +65,6 @@ def clear_log_directory():
                 shutil.rmtree(file_path)
             if os.path.isfile(file_path) and 'tests.log' not in file_path:
                 os.remove(file_path)
-
-
-def pytest_collection(session: Session):  # pylint: disable=unused-argument
-    """Set env var when pytest is in collection mode."""
-    os.environ['PYTEST_IN_COLLECTION'] = 'True'
-
-
-def pytest_collection_finish(session: Session):  # pylint: disable=unused-argument
-    """Clean env var when pytest finishes collection mode."""
-    if 'PYTEST_IN_COLLECTION' in os.environ:
-        del os.environ['PYTEST_IN_COLLECTION']
-
 
 def profiles(profiles_dir: str) -> list:
     """Get all testing profile names for current feature.
@@ -152,17 +139,17 @@ def pytest_unconfigure(config: Config):  # pylint: disable=unused-argument
 
     # display any Errors or Warnings in tests.log
     test_log_file = os.path.join(log_directory, 'tests.log')
+    errors_count = {'ERROR': 0, 'WARNING': 0}
     if os.path.isfile(test_log_file):
         with open(test_log_file, encoding='utf-8') as fh:
-            issues = []
             for line in fh:
-                if '- ERROR - ' in line or '- WARNING - ' in line:
-                    issues.append(line.strip())
-
-            if issues:
-                print('\nErrors and Warnings:')
-                for i in issues:
-                    print(f'- {i}')
+                if '- ERROR - ' in line:
+                     errors_count['ERROR'] += 1
+                elif '- WARNING - ' in line:
+                     errors_count['WARNING'] += 1
+        print(f'Error/Warning Count: {errors_count}')
+        if any((errors_count['ERROR'], errors_count['WARNING'])):
+            print('Please check your log/tests.log file')
 
     # remove service started file
     try:

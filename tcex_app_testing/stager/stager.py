@@ -8,7 +8,6 @@ from redis import Redis
 
 # first-party
 from tcex_app_testing.pleb.cached_property import cached_property
-from tcex_app_testing.profile.model.profile_model import StageModel
 from tcex_app_testing.stager.stager_env import StagerEnv
 from tcex_app_testing.stager.stager_kvstore import StagerKvstore
 from tcex_app_testing.stager.stager_threatconnect import StagerThreatconnect
@@ -59,13 +58,3 @@ class Stager:
     def env(self):
         """Get the current instance of Env for staging data"""
         return StagerEnv()
-
-    def construct_stage_data(self, stage_model: StageModel) -> dict:
-        """Construct the stage data for the profile."""
-        tc_data = self.threatconnect.stage(stage_model.threatconnect)
-        env_data = self.env.stage_model_data()
-        vault_data = self.vault.stage(stage_model.vault)
-        common_keys = set(tc_data.keys()) & set(env_data.keys()) & set(vault_data)
-        if common_keys:
-            raise ValueError(f'Duplicate Staged Key(s): {common_keys} found.')
-        return {'tc': tc_data, 'env': env_data, 'vault': vault_data}
