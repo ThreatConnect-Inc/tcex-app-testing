@@ -85,7 +85,7 @@ class ValidatorABC(ABC):
         return results, details
 
     @staticmethod
-    def _string_to_int_float(x: bytes | float | int | str) -> float | int | str:
+    def _string_to_int_float(x: bytes | float | int | str | None) -> float | int | str | None:
         """Take string input and return float or int.
 
         Args:
@@ -99,9 +99,9 @@ class ValidatorABC(ABC):
             f = float(x)
             i = int(f)
         except TypeError:
-            return x  # return original value
+            return x  # type: ignore
         except ValueError:
-            return x  # return original value
+            return x  # type: ignore
 
         if f != i:
             return f  # return float
