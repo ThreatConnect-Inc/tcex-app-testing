@@ -13,7 +13,6 @@ from uuid import uuid4
 # third-party
 import jmespath
 import pytest
-import responses
 import urllib3
 from _pytest.config import Config
 from _pytest.monkeypatch import MonkeyPatch
