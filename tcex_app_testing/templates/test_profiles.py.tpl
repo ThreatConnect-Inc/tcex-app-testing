@@ -1,6 +1,7 @@
 """TcEx App Testing Module"""
 # standard library
 import os
+import re
 import warnings
 
 # third-party
@@ -54,6 +55,11 @@ class TestProfiles(${class_name}):
     @responses.activate
     def test_profiles(self, profile_name: str, monkeypatch: MonkeyPatch, pytestconfig: Config):
         """Run pre-created testing profiles."""
+
+        # add passthru for all requests if not recording
+        if not pytestconfig.option.record:
+            responses.add_passthru(re.compile(r'.*'))
+
         # initialize profile
         self.aux.init_profile(
             app_inputs=self.app_inputs,

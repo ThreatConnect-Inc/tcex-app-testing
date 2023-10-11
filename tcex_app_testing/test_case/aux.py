@@ -231,9 +231,6 @@ class Aux:
             tcex_testing_context=self.tcex_testing_context,
         )
 
-        if not self._profile_runner.pytest_args_model.record:
-            responses.add_passthru(re.compile(r'.*'))
-
         # this value is not set at the time that the stager/validator is
         # initialized. setting it now should be soon enough for everything
         # to work properly.
@@ -265,6 +262,7 @@ class Aux:
 
     def stage_data(self):
         """Stage data for current profile."""
+
         self.stage_and_replace('env', None, self.stager.env.stage_model_data, fail_on_error=False)
         vault_data = self._profile_runner.data.get('stage', {}).get('vault', {})
         self.stage_and_replace('vault', vault_data, self.stager.vault.stage, fail_on_error=False)
