@@ -53,6 +53,7 @@ class ProfileRunner(Profile):
             merge_inputs=self.pytestconfig.option.merge_inputs,
             replace_exit_message=self.pytestconfig.option.replace_exit_message,
             replace_outputs=self.pytestconfig.option.replace_outputs,
+            record=self.pytestconfig.option.record,
         )
 
     def clear_context(self, context):

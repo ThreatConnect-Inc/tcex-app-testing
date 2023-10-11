@@ -38,6 +38,7 @@ dependencies = [
   "PyYAML",
   "redis<5.0.0",
   "requests",
+  "responses",
   "rich",
   "semantic_version",
   "typer[all]",

@@ -18,6 +18,9 @@ class PytestArgsModel(BaseModel):
     replace_outputs: bool = Field(
         False, description='Replace outputs from profile with outputs from PB execution.'
     )
+    record: bool = Field(
+        False, description='Record all requests and responses for use in future tests.'
+    )
 
     @property
     def updated(self) -> bool:
@@ -27,5 +30,6 @@ class PytestArgsModel(BaseModel):
                 self.merge_inputs,
                 self.replace_exit_message,
                 self.replace_outputs,
+                self.record,
             ]
         )

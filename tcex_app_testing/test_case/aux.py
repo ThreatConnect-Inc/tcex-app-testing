@@ -13,6 +13,7 @@ from uuid import uuid4
 # third-party
 import jmespath
 import pytest
+import responses
 import urllib3
 from _pytest.config import Config
 from _pytest.monkeypatch import MonkeyPatch
@@ -80,6 +81,8 @@ class Aux:
 
         # Setting config model so it can be accessed in custom test files.
         self.config_model = config_model
+
+        self.recorded_data = {}
 
         # add methods to registry
         registry.add_service(App, self.app)
@@ -218,6 +221,7 @@ class Aux:
         pytestconfig: Config,
     ):
         """Stages and sets up the profile given a profile name"""
+
         self.log.info(f'step=run, event=init-profile, profile={profile_name}')
         self._profile_runner = ProfileRunner(
             app_inputs=app_inputs,
@@ -226,6 +230,9 @@ class Aux:
             redis_client=self.app.key_value_store.redis_client,  # pylint: disable=no-member
             tcex_testing_context=self.tcex_testing_context,
         )
+
+        if not self._profile_runner.pytest_args_model.record:
+            responses.add_passthru(re.compile(r'.*'))
 
         # this value is not set at the time that the stager/validator is
         # initialized. setting it now should be soon enough for everything
@@ -263,6 +270,11 @@ class Aux:
         self.stage_and_replace('vault', vault_data, self.stager.vault.stage, fail_on_error=False)
         tc_data = self._profile_runner.data.get('stage', {}).get('threatconnect', {})
         self.stage_and_replace('tc', tc_data, self.stager.threatconnect.stage, fail_on_error=True)
+        request_data = self._profile_runner.data.get('stage', {}).get('request', {})
+        if self._profile_runner.pytest_args_model.record:
+            self.stager.request.record_all(self.recorded_data)
+        else:
+            self.stager.request.stage(request_data)
         self.stager.redis.from_dict(self._profile_runner.model_resolved.stage.kvstore)
 
     def log_staged_data(self):

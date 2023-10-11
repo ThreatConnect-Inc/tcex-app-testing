@@ -8,6 +8,7 @@ import pytest
 from tcex_app_testing.test_case import ${class_name}
 from _pytest.config import Config
 from _pytest.monkeypatch import MonkeyPatch
+import responses
 
 # first-party
 from .custom_feature import CustomFeature
@@ -50,6 +51,7 @@ class TestProfiles(${class_name}):
             self.custom.teardown_method(self)
         super().teardown_method()
 
+    @responses.activate
     def test_profiles(self, profile_name: str, monkeypatch: MonkeyPatch, pytestconfig: Config):
         """Run pre-created testing profiles."""
         # initialize profile
