@@ -283,7 +283,7 @@ class ValidatorABC(ABC):
 
         app_data = self._string_to_int_float(app_data)
         test_data = self._string_to_int_float(test_data)
-        results = operator.ge(app_data, test_data)
+        results = operator.ge(app_data, test_data)  # type: ignore
         details = ''
         if not results:
             details = f'{app_data} {type(app_data)} !(>=) {test_data} {type(test_data)}'
@@ -306,7 +306,7 @@ class ValidatorABC(ABC):
 
         app_data = self._string_to_int_float(app_data)
         test_data = self._string_to_int_float(test_data)
-        results = operator.gt(app_data, test_data)
+        results = operator.gt(app_data, test_data)  # type: ignore
         details = ''
         if not results:
             details = f'{app_data} {type(app_data)} !(>) {test_data} {type(test_data)}'
