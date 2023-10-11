@@ -38,7 +38,9 @@ class StagerKvstore:
                 data = [self._decode_binary(d, variable) for d in data]
 
             if data is not None:
-                self.playbook.create.any(variable, data, validate=False, when_requested=False)
+                self.playbook.create.any(
+                    variable, data, validate=False, when_requested=False  # type: ignore
+                )
 
     def stage(
         self,
