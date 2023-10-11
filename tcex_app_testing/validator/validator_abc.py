@@ -99,9 +99,9 @@ class ValidatorABC(ABC):
             f = float(x)
             i = int(f)
         except TypeError:
-            return x  # type: ignore
+            return x  # pyright: ignore reportGeneralTypeIssues
         except ValueError:
-            return x  # type: ignore
+            return x  # pyright: ignore reportGeneralTypeIssues
 
         if f != i:
             return f  # return float
