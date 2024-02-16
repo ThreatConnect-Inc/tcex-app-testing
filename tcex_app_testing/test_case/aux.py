@@ -263,15 +263,15 @@ class Aux:
         """Stage data for current profile."""
 
         self.stage_and_replace('env', None, self.stager.env.stage_model_data, fail_on_error=False)
-        vault_data = self._profile_runner.data.get('stage', {}).get('vault', {})
-        self.stage_and_replace('vault', vault_data, self.stager.vault.stage, fail_on_error=False)
-        tc_data = self._profile_runner.data.get('stage', {}).get('threatconnect', {})
-        self.stage_and_replace('tc', tc_data, self.stager.threatconnect.stage, fail_on_error=True)
         request_data = self._profile_runner.data.get('stage', {}).get('request', {})
         if self._profile_runner.pytest_args_model.record:
             self.stager.request.record_all(self.recorded_data)
         else:
             self.stager.request.stage(request_data)
+        vault_data = self._profile_runner.data.get('stage', {}).get('vault', {})
+        self.stage_and_replace('vault', vault_data, self.stager.vault.stage, fail_on_error=False)
+        tc_data = self._profile_runner.data.get('stage', {}).get('threatconnect', {})
+        self.stage_and_replace('tc', tc_data, self.stager.threatconnect.stage, fail_on_error=True)
         self.stager.redis.from_dict(self._profile_runner.model_resolved.stage.kvstore)
 
     def log_staged_data(self):

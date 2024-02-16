@@ -478,7 +478,6 @@ class ValidatorABC(ABC):
         Returns:
             dict: The data with excluded values removed.
         """
-        data = {}
         for e in exclude:
             try:
                 es = e.split('.')

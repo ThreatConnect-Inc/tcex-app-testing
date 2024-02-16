@@ -56,6 +56,9 @@ class TestProfiles(${class_name}):
     def test_profiles(self, profile_name: str, monkeypatch: MonkeyPatch, pytestconfig: Config):
         """Run pre-created testing profiles."""
 
+        # add passthru for retrieving the TC Token
+        responses.add_passthru(re.compile(r'.*/internal/token/*'))
+
         # add passthru for all requests if not recording
         if not pytestconfig.option.record:
             responses.add_passthru(re.compile(r'.*'))
