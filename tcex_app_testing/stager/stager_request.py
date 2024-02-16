@@ -88,7 +88,7 @@ def record_all_callback(request, recorded_data: dict, output_path: Path):
     }
     request_args = {k: v for k, v in request_args.items() if v}
     response = requests.request(**request_args)
-    if request.url.startswith('https://vault.tci.ninja') or request.method == 'OPTIONS':
+    if request.url.startswith(os.getenv('VAULT_URL')) or request.method == 'OPTIONS':
         responses.start()
         return response.status_code, {}, response.text
     file_name = generate_file_name(request, response)
