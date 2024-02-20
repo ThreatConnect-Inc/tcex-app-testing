@@ -95,7 +95,7 @@ def record_all_callback(request, recorded_data: dict, output_path: Path):
     with open(output_path / Path(file_name), 'w', encoding='utf-8') as f:
         content = response.text
         if file_name.endswith('.json'):
-            content = json.dumps(response.json(), indent=4)
+            content = json.dumps(response.json())
         f.write(content)
 
     data = {
