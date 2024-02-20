@@ -27,7 +27,7 @@ dependencies = [
   "isort",
   "jmespath",
   "mako",
-  "paho-mqtt",
+  "paho-mqtt<2.0.0",
   "pyaes",
   "pydantic<2.0.0",
   "pytest",
@@ -141,6 +141,8 @@ exclude = [
 ]
 pythonPlatform = "Linux"
 pythonVersion = "3.11"
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
 
 [tool.pytest.ini_options]
 filterwarnings = []
