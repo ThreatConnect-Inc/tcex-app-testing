@@ -468,11 +468,11 @@ class ValidatorABC(ABC):
 
         return self.operator_deep_diff(app_data, test_data, **kwargs)
 
-    def operator_json_eq_exclude(self, data: dict | list, exclude: list) -> dict:
+    def operator_json_eq_exclude(self, data: dict | list, exclude: list) -> dict | list:
         """Remove excluded field from dictionary.
 
         Args:
-            app_data (dict|str): The data to be processed.
+            data (dict|list): The data to be processed.
             exclude (list): The key names to be "excluded" from data.
 
         Returns:
