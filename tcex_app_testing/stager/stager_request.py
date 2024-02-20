@@ -133,7 +133,13 @@ class StagerRequest:
 
     def record_all(self, recorded_data) -> None:
         """Record all requests."""
-        methods = [responses.GET, responses.POST, responses.PUT, responses.DELETE, responses.OPTIONS]
+        methods = [
+            responses.GET,
+            responses.POST,
+            responses.PUT,
+            responses.DELETE,
+            responses.OPTIONS,
+        ]
         for method in methods:
             responses.add_callback(
                 method,
