@@ -1,6 +1,7 @@
 """TcEx App Testing Module"""
 # standard library
 import os
+import re
 import warnings
 
 # third-party
@@ -8,6 +9,7 @@ import pytest
 from tcex_app_testing.test_case import ${class_name}
 from _pytest.config import Config
 from _pytest.monkeypatch import MonkeyPatch
+import responses
 
 # first-party
 from .custom_feature import CustomFeature
@@ -50,8 +52,17 @@ class TestProfiles(${class_name}):
             self.custom.teardown_method(self)
         super().teardown_method()
 
+    @responses.activate
     def test_profiles(self, profile_name: str, monkeypatch: MonkeyPatch, pytestconfig: Config):
         """Run pre-created testing profiles."""
+
+        # add passthru for retrieving the TC Token
+        responses.add_passthru(re.compile(r'.*/internal/token/*'))
+
+        # add passthru for all requests if not recording
+        if not pytestconfig.option.record:
+            responses.add_passthru(re.compile(r'.*'))
+
         # initialize profile
         self.aux.init_profile(
             app_inputs=self.app_inputs,

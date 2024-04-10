@@ -116,6 +116,7 @@ class TestCaseABC(ABC):
         if self.aux.skip is False:
             if self.enable_update_profile:
                 self.aux.profile_runner.update.exit_message()
+                self.aux.profile_runner.update.request(self.aux.recorded_data)
 
             # the "initialized" property is used to determine if the profile was run previously
             # and the exit message and outputs have been updated. if the profile is not

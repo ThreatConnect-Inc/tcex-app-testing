@@ -81,6 +81,8 @@ class Aux:
         # Setting config model so it can be accessed in custom test files.
         self.config_model = config_model
 
+        self.recorded_data = {}
+
         # add methods to registry
         registry.add_service(App, self.app)
         registry.add_service(RequestsTc, self.session)
@@ -218,6 +220,7 @@ class Aux:
         pytestconfig: Config,
     ):
         """Stages and sets up the profile given a profile name"""
+
         self.log.info(f'step=run, event=init-profile, profile={profile_name}')
         self._profile_runner = ProfileRunner(
             app_inputs=app_inputs,
@@ -258,7 +261,13 @@ class Aux:
 
     def stage_data(self):
         """Stage data for current profile."""
+
         self.stage_and_replace('env', None, self.stager.env.stage_model_data, fail_on_error=False)
+        request_data = self._profile_runner.data.get('stage', {}).get('request', {})
+        if self._profile_runner.pytest_args_model.record:
+            self.stager.request.record_all(self.recorded_data)
+        else:
+            self.stager.request.stage(request_data)
         vault_data = self._profile_runner.data.get('stage', {}).get('vault', {})
         self.stage_and_replace('vault', vault_data, self.stager.vault.stage, fail_on_error=False)
         tc_data = self._profile_runner.data.get('stage', {}).get('threatconnect', {})

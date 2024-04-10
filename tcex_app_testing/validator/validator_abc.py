@@ -85,7 +85,7 @@ class ValidatorABC(ABC):
         return results, details
 
     @staticmethod
-    def _string_to_int_float(x: bytes | float | int | str) -> float | int | str:
+    def _string_to_int_float(x: bytes | float | int | str | None) -> float | int | str | None:
         """Take string input and return float or int.
 
         Args:
@@ -99,9 +99,9 @@ class ValidatorABC(ABC):
             f = float(x)
             i = int(f)
         except TypeError:
-            return x  # return original value
+            return x  # pyright: ignore reportGeneralTypeIssues
         except ValueError:
-            return x  # return original value
+            return x  # pyright: ignore reportGeneralTypeIssues
 
         if f != i:
             return f  # return float
@@ -283,7 +283,7 @@ class ValidatorABC(ABC):
 
         app_data = self._string_to_int_float(app_data)
         test_data = self._string_to_int_float(test_data)
-        results = operator.ge(app_data, test_data)
+        results = operator.ge(app_data, test_data)  # type: ignore
         details = ''
         if not results:
             details = f'{app_data} {type(app_data)} !(>=) {test_data} {type(test_data)}'
@@ -306,7 +306,7 @@ class ValidatorABC(ABC):
 
         app_data = self._string_to_int_float(app_data)
         test_data = self._string_to_int_float(test_data)
-        results = operator.gt(app_data, test_data)
+        results = operator.gt(app_data, test_data)  # type: ignore
         details = ''
         if not results:
             details = f'{app_data} {type(app_data)} !(>) {test_data} {type(test_data)}'
@@ -468,17 +468,16 @@ class ValidatorABC(ABC):
 
         return self.operator_deep_diff(app_data, test_data, **kwargs)
 
-    def operator_json_eq_exclude(self, data: dict | list, exclude: list) -> dict:
+    def operator_json_eq_exclude(self, data: dict | list, exclude: list) -> dict | list:
         """Remove excluded field from dictionary.
 
         Args:
-            app_data (dict|str): The data to be processed.
+            data (dict|list): The data to be processed.
             exclude (list): The key names to be "excluded" from data.
 
         Returns:
             dict: The data with excluded values removed.
         """
-        data = {}
         for e in exclude:
             try:
                 es = e.split('.')

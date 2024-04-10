@@ -85,6 +85,7 @@ class StageModel(BaseModel):
     kvstore: dict = Field({}, description='')
     threatconnect: dict = Field({}, description='')
     vault: dict = Field({}, description='')
+    request: dict = Field({}, description='A RequestModel object.')
 
 
 class ProfileModel(BaseModel):

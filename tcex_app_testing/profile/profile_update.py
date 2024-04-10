@@ -168,6 +168,23 @@ class ProfileUpdate:
         # write updated profile
         self.profile.rewrite_contents(contents=contents)
 
+    def request(self, data: dict):
+        """Update the validation rules for outputs section of a profile."""
+        if self.profile.pytest_args_model.record:
+            deduped_data = {}
+            for method, requests in data.items():
+                deduped_data[method] = []
+                file_names = set()
+                for request in requests:
+                    if request.get('output_file') not in file_names:
+                        deduped_data[method].append(request)
+                        file_names.add(request.get('output_file'))
+            contents = self.profile.contents
+            contents['stage'].setdefault('request', {})
+            contents['stage']['request'] = deduped_data
+
+            self.profile.rewrite_contents(contents)
+
     def outputs(self):
         """Update the validation rules for outputs section of a profile.
 

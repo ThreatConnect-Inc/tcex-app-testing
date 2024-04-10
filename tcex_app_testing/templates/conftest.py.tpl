@@ -91,6 +91,7 @@ def pytest_addoption(parser: Parser):
     parser.addoption('--merge_inputs', action='store_true')
     parser.addoption('--replace_exit_message', action='store_true')
     parser.addoption('--replace_outputs', action='store_true')
+    parser.addoption('--record', action='store_true')
     parser.addoption(
         '--environment',
         action='append',
