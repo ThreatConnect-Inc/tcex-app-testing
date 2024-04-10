@@ -23,7 +23,7 @@ dependencies = [
   "black",
   "deepdiff",
   "hvac",
-  "inflect",
+  "inflection",
   "isort",
   "jmespath",
   "mako",

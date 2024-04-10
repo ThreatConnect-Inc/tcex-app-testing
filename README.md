@@ -9,7 +9,7 @@ The TcEx App testing framework provides functionality for using pytest to test T
  * black (https://pypi.org/project/black/)
  * deepdiff (https://pypi.org/project/deepdiff/)
  * hvac (https://pypi.org/project/hvac/)
- * inflect (https://pypi.python.org/pypi/inflect)
+ * inflection (https://pypi.python.org/pypi/inflection)
  * isort (https://pypi.org/project/isort/)
  * jmespath (https://pypi.org/project/jmespath/)
  * mako (https://pypi.org/project/mako/)
