@@ -141,6 +141,9 @@ exclude = [
 ]
 pythonPlatform = "Linux"
 pythonVersion = "3.11"
+reportIncompatibleMethodOverride = false
+reportIncompatibleVariableOverride = false
+reportPrivateImportUsage = false
 
 [tool.pytest.ini_options]
 filterwarnings = []

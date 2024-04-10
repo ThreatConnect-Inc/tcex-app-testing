@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import base64
 import binascii
@@ -35,12 +36,12 @@ class StagerKvstore:
             if data is not None and variable_type == 'Binary':
                 data = self._decode_binary(data, variable)
             elif data is not None and variable_type == 'BinaryArray':
-                data = [
-                    d for d in [self._decode_binary(d, variable) for d in data] if d is not None
-                ]
+                data = [self._decode_binary(d, variable) for d in data]
 
             if data is not None:
-                self.playbook.create.any(variable, data, validate=False, when_requested=False)
+                self.playbook.create.any(
+                    variable, data, validate=False, when_requested=False  # type: ignore
+                )
 
     def stage(
         self,
@@ -58,7 +59,7 @@ class StagerKvstore:
         return 0
 
     @staticmethod
-    def _decode_binary(binary_data: bytes, variable: str) -> bytes | None:
+    def _decode_binary(binary_data: bytes | None, variable: str) -> bytes | None:
         """Base64 decode binary data."""
         try:
             data = None
