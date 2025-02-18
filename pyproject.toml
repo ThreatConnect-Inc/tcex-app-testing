@@ -22,6 +22,7 @@ dependencies = [
   "arrow",
   "black",
   "deepdiff",
+  "fakeredis",
   "hvac",
   "inflection",
   "isort",
@@ -41,7 +42,7 @@ dependencies = [
   "responses",
   "rich",
   "semantic_version",
-  "typer[all]",
+  "typer",
 ]
 description = "ThreatConnect Exchange App Testing Framework"
 dynamic = ["readme", "version"]

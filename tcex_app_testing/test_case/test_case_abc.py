@@ -12,7 +12,7 @@ import urllib3
 
 # first-party
 from tcex_app_testing.config_model import config_model
-from tcex_app_testing.test_case.aux import Aux
+from tcex_app_testing.test_case.aux_ import Aux
 
 # disable ssl warning message
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type: ignore

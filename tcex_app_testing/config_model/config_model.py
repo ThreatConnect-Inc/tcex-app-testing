@@ -56,6 +56,7 @@ class ConfigModel(BaseModel):
         app_input=True,
         description='The default organization for the TC Exchange Admin API.',
         env='/threatconnect/tc/tc_api_default_org',
+        env_default='',
     )
     tc_api_secret_key: Sensitive = Field(
         None,
@@ -229,6 +230,7 @@ class ConfigModel(BaseModel):
         None,
         app_input=True,
         env='/threatconnect/tc/tc_proxy_username',
+        env_default='',
         description='The proxy username.',
     )
 
@@ -332,7 +334,7 @@ class ConfigModel(BaseModel):
     @property
     def test_case_feature(self) -> str:
         """Return partially parsed test case data."""
-        return self.test_case_data[0].split('/')[1].replace('/', '-')
+        return os.path.normpath(self.test_case_data[0]).split(os.sep)[1].replace(os.sep, '-')
 
     @property
     def test_case_feature_dir(self) -> Path:

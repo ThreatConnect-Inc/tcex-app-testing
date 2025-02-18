@@ -9,6 +9,7 @@ commony
 debugpy
 deepdiff
 editchoice
+fakeredis
 feedapiservice
 functool
 hdel
