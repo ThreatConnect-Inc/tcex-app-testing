@@ -55,7 +55,7 @@ class StagerKvstore:
         """Delete data in redis"""
         keys = self.redis_client.hkeys(context)
         if keys:
-            return self.redis_client.hdel(context, *keys)
+            return self.redis_client.hdel(context, *keys)  # type: ignore
         return 0
 
     @staticmethod

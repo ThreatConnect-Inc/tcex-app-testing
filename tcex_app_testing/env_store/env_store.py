@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 import os
@@ -107,14 +108,14 @@ class EnvStore(metaclass=Singleton):
         # provide an error so dev/qa engineer knows that
         # an env var they provide could not be found
         if value is None:
-            Render.panel.failure(
+            Render.panel.error(
                 f'Could not resolve env variable {env_variable} ({env_var_updated}).'
             )
 
         # update cache
         if env_type not in ['local']:
             self.cache[cache_key] = value
-        return value
+        return value or ''
 
     def read_from_vault(self, full_path: str, default: str | None = None) -> str | None:
         """Read data from Vault for the provided path.

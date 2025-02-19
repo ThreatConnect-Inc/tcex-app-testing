@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 from typing import TYPE_CHECKING, Any
@@ -120,7 +121,7 @@ class ProfileUpdate:
             redis_data = self.redis_client.hgetall(context)
 
             # updated outputs with validation data
-            self._generate_output_data(outputs, redis_data)
+            self._generate_output_data(outputs, redis_data)  # type: ignore
 
             # cleanup redis
             self.profile.clear_context(context)

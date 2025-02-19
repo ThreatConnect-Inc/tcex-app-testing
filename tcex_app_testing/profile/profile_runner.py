@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 
@@ -64,7 +65,7 @@ class ProfileRunner(Profile):
         """
         keys = self.redis_client.hkeys(context)
         if keys:
-            return self.redis_client.hdel(context, *keys)
+            return self.redis_client.hdel(context, *keys)  # type: ignore
         return 0
 
     @cached_property
@@ -89,7 +90,8 @@ class ProfileRunner(Profile):
         if not self._context_tracker:
             if self.tcex_testing_context:
                 self._context_tracker = json.loads(
-                    self.redis_client.hget(self.tcex_testing_context, '_context_tracker') or '[]'
+                    self.redis_client.hget(self.tcex_testing_context, '_context_tracker')
+                    or '[]'  # type: ignore
                 )
         return self._context_tracker
 

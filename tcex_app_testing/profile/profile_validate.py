@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 from typing import TYPE_CHECKING, cast
@@ -90,15 +91,17 @@ class ProfileValidate:
             raise RuntimeError('Redis client is not initialized.')
 
         for context in self.profile.context_tracker:
-            context_keys = [k.decode('utf-8') for k in self.redis_client.hkeys(context)]
+            context_keys = [
+                k.decode('utf-8') for k in self.redis_client.hkeys(context)  # type: ignore
+            ]
             self.log.info(f'step=validate, event=validate-outputs, context-keys={context_keys}')
             for variable in self.profile.tc_playbook_out_variables:
                 # get data from redis for current context
-                data = self.redis_client.hget(context, variable.encode('utf-8'))
+                data = self.redis_client.hget(context, variable.encode('utf-8'))  # type: ignore
 
                 # TODO: does this need to use playbooks?
                 if data is not None:
-                    data = json.loads(data.decode('utf-8'))
+                    data = json.loads(data.decode('utf-8'))  # type: ignore
 
                 # data should be a string here
                 data = cast(str, data)

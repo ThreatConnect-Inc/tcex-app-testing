@@ -1,17 +1,21 @@
-"""TcEx App Testing Module"""
 # standard library
 import os
 import shutil
+import socket
 import sys
 from importlib.metadata import version
+from json import load
 from pathlib import Path
+from threading import Thread
 
 # third-party
-from fakeredis import TcpFakeServer
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from _pytest.python import Metafunc
+from dotenv import load_dotenv
+from fakeredis import TcpFakeServer
 
+load_dotenv()
 
 def validate_deps(deps_dir: Path):
     """Validate deps directory exists."""
@@ -66,6 +70,7 @@ def clear_log_directory():
                 shutil.rmtree(file_path)
             if os.path.isfile(file_path) and 'tests.log' not in file_path:
                 os.remove(file_path)
+
 
 def profiles(profiles_dir: str) -> list:
     """Get all testing profile names for current feature.
@@ -125,20 +130,32 @@ def pytest_generate_tests(metafunc: Metafunc):
     metafunc.parametrize('profile_name,', profile_names)
 
 
-tcp_fake_server = None
-
 def pytest_configure(config: Config):  # pylint: disable=unused-argument
     """Execute configure logic before test is started."""
-    global tcp_fake_server
-    self.tcp_fake_server = TcpFakeServer('localhost', server_type='redis')
+    config.tcp_fake_server = None
+    server_address = 'localhost'
+    server_port = 6379
 
-    self.t = Thread(target=self.tcp_fake_server.serve_forever, daemon=False)
-    self.t.start()
+    def is_port_in_use() -> bool:
+        """Check if a port is in use."""
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+            return s.connect_ex((server_address, server_port)) == 0
+
+    if not is_port_in_use():
+        tcp_fake_server = TcpFakeServer((server_address, server_port), server_type='redis')
+        tcp_fake_server.daemon_threads = True
+        t = Thread(target=tcp_fake_server.serve_forever, daemon=True)
+        t.start()
+        config.tcp_fake_server = tcp_fake_server
+
+        print('Starting fake Redis server.')
+
 
 def pytest_unconfigure(config: Config):  # pylint: disable=unused-argument
     """Execute unconfigure logic before test process is exited."""
-    global tcp_fake_server
-    tcp_fake_server.shutdown()
+    if config.tcp_fake_server:
+        config.tcp_fake_server.server_close()
+        config.tcp_fake_server.shutdown()
     log_directory = os.path.join(os.getcwd(), 'log')
 
     # remove any 0 byte files from log directory
@@ -158,9 +175,9 @@ def pytest_unconfigure(config: Config):  # pylint: disable=unused-argument
         with open(test_log_file, encoding='utf-8') as fh:
             for line in fh:
                 if '- ERROR - ' in line:
-                     errors_count['ERROR'] += 1
+                    errors_count['ERROR'] += 1
                 elif '- WARNING - ' in line:
-                     errors_count['WARNING'] += 1
+                    errors_count['WARNING'] += 1
         print(f'Error/Warning Count: {errors_count}')
         if any((errors_count['ERROR'], errors_count['WARNING'])):
             print('Please check your log/tests.log file')
