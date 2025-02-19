@@ -7,6 +7,7 @@ from importlib.metadata import version
 from pathlib import Path
 
 # third-party
+from fakeredis import TcpFakeServer
 from _pytest.config import Config
 from _pytest.config.argparsing import Parser
 from _pytest.python import Metafunc
@@ -124,8 +125,20 @@ def pytest_generate_tests(metafunc: Metafunc):
     metafunc.parametrize('profile_name,', profile_names)
 
 
+tcp_fake_server = None
+
+def pytest_configure(config: Config):  # pylint: disable=unused-argument
+    """Execute configure logic before test is started."""
+    global tcp_fake_server
+    self.tcp_fake_server = TcpFakeServer('localhost', server_type='redis')
+
+    self.t = Thread(target=self.tcp_fake_server.serve_forever, daemon=False)
+    self.t.start()
+
 def pytest_unconfigure(config: Config):  # pylint: disable=unused-argument
     """Execute unconfigure logic before test process is exited."""
+    global tcp_fake_server
+    tcp_fake_server.shutdown()
     log_directory = os.path.join(os.getcwd(), 'log')
 
     # remove any 0 byte files from log directory
