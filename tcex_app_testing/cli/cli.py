@@ -1,8 +1,8 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
-import os
-import traceback
+from pathlib import Path
 
 # third-party
 import typer
@@ -33,7 +33,9 @@ def create(
         ...,
         help=('The name of the testing profile (e.g. negative_retrieve_alerts_null_id_input).'),
     ),
-    interactive: bool = typer.Option(False, help='When set to True, interactive mode is enabled.'),
+    interactive: bool = typer.Option(
+        default=False, help='When set to True, interactive mode is enabled.'
+    ),
 ):
     """Create a test case or negative test cases."""
 
@@ -52,19 +54,14 @@ def create(
         # render all templates in the tests directory
         tcc.templates_tests.render_templates()
 
-        if interactive is True:
-            # adds the profile to the json
-            profile_status = tcc.interactive_profile()
-        else:
-            # adds the profile to the json
-            profile_status = tcc.profile.add()
+        profile_status = tcc.interactive_profile() if interactive is True else tcc.profile.add()
 
         # build table row data
         row_data = []
         row_data.extend(tcc.templates_feature.results)
         row_data.append(
             [
-                os.path.basename(config_model.test_case_profile_filename),
+                Path(config_model.test_case_profile_filename).name,
                 str(config_model.test_case_profile_filename),
                 profile_status,
             ]
@@ -74,7 +71,7 @@ def create(
         # render results table
         Render.table_file_results(row_data, 'Test Case Create Results')
     except Exception as ex:
-        _logger.error(traceback.format_exc())
+        _logger.exception('Error running the create command.')
         Render.panel.failure(f'Exception: {ex}')
 
 
@@ -103,7 +100,7 @@ def negative(
         # render results table
         Render.table_file_results(tcn.results, 'Test Case Create Negative Results')
     except Exception as ex:
-        _logger.error(traceback.format_exc())
+        _logger.exception('Error running the negative command.')
         Render.panel.failure(f'Exception: {ex}')
 
 
@@ -114,7 +111,7 @@ def update():
         tcu = Update()
         _logger.info('Updating test cases.')
 
-        if os.path.isdir('tests'):
+        if Path('tests').is_dir():
             # render all templates in the feature directory
             tcu.update_feature_files()
 
@@ -129,7 +126,7 @@ def update():
             # render results table
             Render.table_file_results(row_data, 'Test Case Update Results')
     except Exception as ex:
-        _logger.error(traceback.format_exc())
+        _logger.exception('Error running the update command.')
         Render.panel.failure(f'Exception: {ex}')
 
 

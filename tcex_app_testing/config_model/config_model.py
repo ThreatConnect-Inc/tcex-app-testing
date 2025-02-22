@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 import logging
@@ -25,10 +26,10 @@ env_store = EnvStore()
 ij = InstallJson()
 
 # define JSON encoders
-json_encoders = {Sensitive: lambda v: v.value}  # pylint: disable=unnecessary-lambda
+json_encoders = {Sensitive: lambda v: v.value}
 
 
-def env_store_getenv(v: str, field: ModelField) -> str | None:
+def env_store_getenv(v: str | None, field: ModelField) -> str | None:
     """Get environment variables."""
     if v is None:
         default = field.field_info.extra.get('env_default')
@@ -101,7 +102,7 @@ class ConfigModel(BaseModel):
     tc_log_file: str = Field(
         'app.log',
         app_input=True,
-        description='The default name of the App\'s log file.',
+        description="The default name of the App's log file.",
     )
     tc_log_level: str = Field(
         env_store.getenv('TC_LOG_LEVEL', env_type='local', default='trace'),
@@ -290,16 +291,15 @@ class ConfigModel(BaseModel):
     #
 
     @property
-    def app_path(self) -> str:
+    def app_path(self) -> Path:
         """Return the path to the App."""
-        return os.getcwd()
+        return Path.cwd()
 
     @property
     def current_test(self) -> str:
         """Return properly formatted value for current test."""
-        pytest_current_test = os.getenv('PYTEST_CURRENT_TEST', '').split(' ')[0]
         # _logger.debug(f'PYTEST_CURRENT_TEST={pytest_current_test}')
-        return pytest_current_test
+        return os.getenv('PYTEST_CURRENT_TEST', '').split(' ')[0]
 
     @property
     def os_environments(self) -> set[str]:
@@ -329,37 +329,37 @@ class ConfigModel(BaseModel):
     @property
     def test_case_dir(self) -> Path:
         """Return profile fully qualified filename."""
-        return Path(os.path.join(self.app_path, 'tests'))
+        return self.app_path / 'tests'
 
     @property
     def test_case_feature(self) -> str:
         """Return partially parsed test case data."""
-        return os.path.normpath(self.test_case_data[0]).split(os.sep)[1].replace(os.sep, '-')
+        return Path(os.path.normpath(self.test_case_data[0])).parts[1].replace(os.sep, '-')
 
     @property
     def test_case_feature_dir(self) -> Path:
         """Return profile fully qualified filename."""
-        return Path(os.path.join(self.test_case_dir, self.test_case_feature))
+        return self.test_case_dir / self.test_case_feature
 
     @property
     def test_case_feature_profile_dir(self) -> Path:
         """Return profile fully qualified filename."""
-        return Path(os.path.join(self.test_case_feature_dir, 'profiles.d'))
+        return self.test_case_feature_dir / 'profiles.d'
 
     @property
     def test_case_log_feature_dir(self) -> Path:
         """Return profile fully qualified filename."""
-        return Path(os.path.join(self.app_path, self.tc_log_path, self.test_case_feature))
+        return self.app_path / self.tc_log_path / self.test_case_feature
 
     @property
     def test_case_log_test_dir(self) -> Path:
         """Return profile fully qualified filename."""
-        return Path(os.path.join(self.test_case_log_feature_dir, self.test_case_name))
+        return self.test_case_log_feature_dir / self.test_case_name
 
     @property
     def test_case_message_tc_filename(self) -> Path:
         """Return profile fully qualified filename."""
-        return Path(os.path.join(self.test_case_tc_out_path, 'message.tc'))
+        return self.test_case_tc_out_path / 'message.tc'
 
     @property
     def test_case_name(self) -> str:
@@ -372,49 +372,48 @@ class ConfigModel(BaseModel):
         name_pattern = r'^test_[a-zA-Z0-9_]+\[(.+)\]$'
         _profile_name = re.search(name_pattern, self.test_case_data[-1])
         if _profile_name is None:
-            raise RuntimeError(f'Unable to parse profile name from {self.test_case_data[-1]}')
+            ex_msg = f'Unable to parse profile name from {self.test_case_data[-1]}'
+            raise RuntimeError(ex_msg)
         return _profile_name.group(1)
 
     @property
     def test_case_profile_filename(self) -> Path:
         """Return profile fully qualified filename."""
-        return Path(
-            os.path.join(self.test_case_feature_profile_dir, f'{self.test_case_profile_name}.json')
-        )
+        return self.test_case_feature_profile_dir / f'{self.test_case_profile_name}.json'
 
     @property
     def test_case_profile_filename_rel(self) -> str:
         """Return profile fully qualified filename."""
-        return f'./{self.test_case_profile_filename.relative_to(os.getcwd())}'
+        return f'./{self.test_case_profile_filename.relative_to(Path.cwd())}'
 
     @property
     def test_case_tc_in_path(self) -> Path:
         """Return profile fully qualified filename."""
-        fqfn = os.path.join(self.app_path, self.tc_in_path, self.test_case_feature)
+        fqfn = self.app_path / self.tc_in_path / self.test_case_feature
         if ij.model.runtime_level.lower() not in self.runtime_level_service_apps:
-            fqfn = os.path.join(fqfn, self.test_case_name)
-        return Path(fqfn)
+            fqfn = fqfn / self.test_case_name
+        return fqfn
 
     @property
     def test_case_tc_log_path(self) -> Path:
         """Return profile fully qualified filename."""
-        fqfn = os.path.join(self.app_path, self.tc_log_path, self.test_case_feature)
+        fqfn = self.app_path / self.tc_log_path / self.test_case_feature
         if ij.model.runtime_level.lower() not in self.runtime_level_service_apps:
-            fqfn = os.path.join(fqfn, self.test_case_name)
-        return Path(fqfn)
+            fqfn = fqfn / self.test_case_name
+        return fqfn
 
     @property
     def test_case_tc_out_path(self) -> Path:
         """Return profile fully qualified filename."""
-        fqfn = os.path.join(self.app_path, self.tc_out_path, self.test_case_feature)
+        fqfn = self.app_path / self.tc_out_path / self.test_case_feature
         if ij.model.runtime_level.lower() not in self.runtime_level_service_apps:
-            fqfn = os.path.join(fqfn, self.test_case_name)
-        return Path(fqfn)
+            fqfn = fqfn / self.test_case_name
+        return fqfn
 
     @property
     def test_case_tc_temp_path(self) -> Path:
         """Return profile fully qualified filename."""
-        fqfn = os.path.join(self.app_path, self.tc_temp_path, self.test_case_feature)
+        fqfn = self.app_path / self.tc_temp_path / self.test_case_feature
         if ij.model.runtime_level.lower() not in self.runtime_level_service_apps:
-            fqfn = os.path.join(fqfn, self.test_case_name)
-        return Path(fqfn)
+            fqfn = fqfn / self.test_case_name
+        return fqfn

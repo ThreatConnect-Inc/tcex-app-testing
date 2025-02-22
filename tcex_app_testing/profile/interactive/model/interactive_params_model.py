@@ -24,11 +24,9 @@ class InteractiveParamsModel(ParamsModel):
     )
 
     @property
-    def array_type(self):
+    def array_type(self) -> bool:
         """Return array type."""
-        if self.data_type is not None and self.data_type.endswith('Array'):
-            return True
-        return False
+        return self.data_type is not None and self.data_type.endswith('Array')
 
     class Config:
         """DataModel Config"""

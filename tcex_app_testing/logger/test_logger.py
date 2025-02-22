@@ -1,7 +1,8 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
-import os
+from pathlib import Path
 
 from .rotating_file_handler_custom import RotatingFileHandlerCustom
 from .trace_logger import TraceLogger
@@ -16,14 +17,14 @@ class TestLogger(TraceLogger):
         self.setLevel(5)
 
         # set the appropriate log file name (must be tests.log)
-        filename = os.path.join(os.getcwd(), 'log', 'tests.log')
+        filename = Path.cwd() / 'log' / 'tests.log'
 
         # clear previous logfile
-        if os.path.exists(filename):
-            os.remove(filename)
+        if filename.exists():
+            filename.unlink()
 
         # add rotating log handler for entire test suite
-        lfh = RotatingFileHandlerCustom(filename=filename)
+        lfh = RotatingFileHandlerCustom(filename=str(filename))
 
         # create formatter
         formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')

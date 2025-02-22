@@ -1,5 +1,7 @@
 """TcEx Framework Module"""
+
 # standard library
+import contextlib
 import datetime
 import difflib
 import hashlib
@@ -37,30 +39,29 @@ class ValidatorABC(ABC):
     @staticmethod
     def _load_json_data(data: str | list | dict) -> dict | list:
         """Load json data."""
-        if isinstance(data, (str)):
+        if isinstance(data, str):
             return json.loads(data)
 
-        if isinstance(data, (list)):
+        if isinstance(data, list):
             # ADI-1076/ADI-1149
             data_updated = []
             for ad in data:
-                if isinstance(ad, (OrderedDict, dict)):
-                    ad = json.dumps(ad)
+                ad_ = ad
+                if isinstance(ad, (OrderedDict | dict)):
+                    ad_ = json.dumps(ad)
 
-                try:
+                with contextlib.suppress(Exception):
                     # APP-599 - best effort try to stringify value in list
-                    ad = json.loads(ad)
-                except Exception:  # nosec
-                    pass
+                    ad_ = json.loads(ad)  # type: ignore
 
-                data_updated.append(ad)
+                data_updated.append(ad_)
             return data_updated
         return data
 
     def _basic_operator(
         self,
-        app_data: float | int | str | None,
-        test_data: float | int | str | None,
+        app_data: float | str | None,
+        test_data: float | str | None,
         op: Callable,
     ) -> tuple[bool, str]:
         """Compare app data is less than or equal to tests data.
@@ -85,7 +86,7 @@ class ValidatorABC(ABC):
         return results, details
 
     @staticmethod
-    def _string_to_int_float(x: bytes | float | int | str | None) -> float | int | str | None:
+    def _string_to_int_float(x: bytes | float | str | None) -> float | int | str | None:
         """Take string input and return float or int.
 
         Args:
@@ -108,19 +109,16 @@ class ValidatorABC(ABC):
         return i  # return int
 
     @staticmethod
-    def check_null(data_list: float | int | list | str | None) -> bool:
+    def check_null(data_list: float | list | str | None) -> bool:
         """Check if data_list is None or if None exists in the data_list."""
         data_list = data_list if isinstance(data_list, list) else [data_list]
 
-        for data in data_list:
-            if data is None:
-                return True
-        return False
+        return any(data is None for data in data_list)
 
     def details(
         self,
-        app_data: dict | float | int | list | str | None,
-        test_data: dict | float | int | list | str | None,
+        app_data: dict | float | list | str | None,
+        test_data: dict | float | list | str | None,
         op: str,
     ) -> str:
         """Return details about the validation."""
@@ -163,6 +161,7 @@ class ValidatorABC(ABC):
             app_data: One or more date strings.
             test_data: A strptime string for comparison.
         """
+        # this code should be unreachable, but this is a safety check
         if not isinstance(test_data, str):
             return (
                 False,
@@ -177,7 +176,7 @@ class ValidatorABC(ABC):
         passed = True
         for data in app_data:
             try:
-                datetime.datetime.strptime(data, test_data)
+                datetime.datetime.strptime(data, test_data).astimezone(datetime.UTC)
             except ValueError:
                 bad_data.append(data)
                 passed = False
@@ -191,10 +190,6 @@ class ValidatorABC(ABC):
 
         Due to some values coming in as StringVariables, we want to ignore type differences
         kwargs['ignore_string_type_changes'] = True
-
-        Args:
-            app_data: The data created by the App.
-            test_data: The data provided in the test case.
         """
         # quick validate -> pass is both values are null
         if app_data is None and test_data is None:
@@ -216,10 +211,11 @@ class ValidatorABC(ABC):
                 safe_data = []
                 for ad in data:
                     if isinstance(ad, OrderedDict):
-                        ad = json.loads(json.dumps(ad))
+                        safe_data.append(json.loads(json.dumps(ad)))
                     elif isinstance(ad, StringVariable):
-                        ad = str(ad)
-                    safe_data.append(ad)
+                        safe_data.append(str(ad))
+                    else:
+                        safe_data.append(ad)
             return safe_data
 
         # update app_data
@@ -267,7 +263,7 @@ class ValidatorABC(ABC):
         return results, self.details(app_data, test_data, 'eq')
 
     def operator_ge(
-        self, app_data: float | int | str | None, test_data: float | int | str | None
+        self, app_data: float | str | None, test_data: float | str | None
     ) -> tuple[bool, str]:
         """Compare app data is greater than or equal to tests data.
 
@@ -290,7 +286,7 @@ class ValidatorABC(ABC):
         return results, details
 
     def operator_gt(
-        self, app_data: float | int | str | None, test_data: float | int | str | None
+        self, app_data: float | str | None, test_data: float | str | None
     ) -> tuple[bool, str]:
         """Compare app data is greater than tests data.
 
@@ -314,13 +310,8 @@ class ValidatorABC(ABC):
 
     @staticmethod
     def operator_hash_eq(app_data: bytes | str, test_data: str, **kwargs) -> tuple[bool, str]:
-        """Compare SHA256 hash of app data against SHA256 hash stored in expected_output.
-
-        Args:
-            app_data: The data created by the App.
-            test_data: The data provided in the test case.
-        """
-        if isinstance(app_data, (bytes, bytearray)):
+        """Compare SHA256 hash of app data against SHA256 hash stored in expected_output."""
+        if isinstance(app_data, bytes | bytearray):
             app_data_hash = hashlib.sha256(app_data).hexdigest()
         elif isinstance(app_data, str):
             encoding = kwargs.get('encoding', 'utf-8')
@@ -363,17 +354,17 @@ class ValidatorABC(ABC):
         for data in app_data:
             if isinstance(data, str):
                 try:
-                    data = json.loads(data)
-                    if not isinstance(data, list):
-                        data = [data]
-                    for item in data:
+                    data_ = json.loads(data)
+                    if not isinstance(data_, list):
+                        data_ = [data_]
+                    for item in data_:
                         if not isinstance(item, dict):
                             bad_data.append(f'Invalid JSON data provide ({item}).')
                 except ValueError:
                     bad_data.append(f'Invalid JSON data provide ({data}).')
-            elif isinstance(data, (OrderedDict, dict)):
+            elif isinstance(data, OrderedDict | dict):
                 try:
-                    data = json.dumps(data)
+                    data_ = json.dumps(data)
                 except ValueError:
                     bad_data.append(f'Invalid JSON data provide ({data}).')
             else:
@@ -392,7 +383,7 @@ class ValidatorABC(ABC):
         bad_data = []
         passed = True
         for data in app_data:
-            if isinstance(data, str) and isinstance(self._string_to_int_float(data), (int, float)):
+            if isinstance(data, str) and isinstance(self._string_to_int_float(data), int | float):
                 continue
             if isinstance(data, numbers.Number):
                 continue
@@ -435,10 +426,6 @@ class ValidatorABC(ABC):
 
         Takes a str, dict, or list value and removed field before passing to deepdiff. Only fields
         at the "root" level can be removed (e.g., "date", not "data.date").
-
-        Args:
-            app_data: The data created by the App.
-            test_data: The data provided in the test case.
         """
         # quick validate -> pass is both values are null
         if app_data is None and test_data is None:
@@ -469,32 +456,17 @@ class ValidatorABC(ABC):
         return self.operator_deep_diff(app_data, test_data, **kwargs)
 
     def operator_json_eq_exclude(self, data: dict | list, exclude: list) -> dict | list:
-        """Remove excluded field from dictionary.
-
-        Args:
-            data (dict|list): The data to be processed.
-            exclude (list): The key names to be "excluded" from data.
-
-        Returns:
-            dict: The data with excluded values removed.
-        """
+        """Remove excluded field from dictionary."""
         for e in exclude:
             try:
                 es = e.split('.')
                 data = self.remove_excludes(data, es)
-            except (AttributeError, KeyError, TypeError) as err:
-                self.log.error(
-                    f'step=validate, event=invalid-validation-configuration, error={err}'
-                )
+            except (AttributeError, KeyError, TypeError):
+                self.log.exception('step=validate, event=invalid-validation-configuration')
         return data
 
     def operator_keyvalue_eq(self, app_data: dict, test_data: dict, **kwargs) -> tuple:
-        """Compare app data equals tests data.
-
-        Args:
-            app_data: The data created by the App.
-            test_data: The data provided in the test case.
-        """
+        """Compare app data equals tests data."""
         # remove exclude_key field. usually dynamic data like date fields.
         if kwargs.get('exclude_keys') is not None:
             app_data = {
@@ -508,7 +480,7 @@ class ValidatorABC(ABC):
         return self.operator_deep_diff(app_data, test_data, **kwargs)
 
     def operator_le(
-        self, app_data: float | int | str | None, test_data: float | int | str | None
+        self, app_data: float | str | None, test_data: float | str | None
     ) -> tuple[bool, str]:
         """Compare app data is less than or equal to tests data.
 
@@ -535,7 +507,7 @@ class ValidatorABC(ABC):
         if not (
             (isinstance(test_data, str) and isinstance(app_data, str))
             or (isinstance(test_data, list) and isinstance(app_data, list))
-            or (isinstance(test_data, int) and isinstance(app_data, (list, str)))
+            or (isinstance(test_data, int) and isinstance(app_data, list | str))
         ):
             msg = (
                 f'Cannot compare App Data Type: {type(app_data)} '
@@ -543,10 +515,7 @@ class ValidatorABC(ABC):
             )
             return False, msg
         app_len = len(app_data)
-        if isinstance(test_data, int):
-            test_len = test_data
-        else:
-            test_len = len(test_data)
+        test_len = test_data if isinstance(test_data, int) else len(test_data)
 
         results = operator.eq(app_len, test_len)
         return results, f'App Data Length: {app_len} | Test Data Length: {test_len}'
@@ -560,7 +529,7 @@ class ValidatorABC(ABC):
         """
         return self._basic_operator(app_data, test_data, operator.ge)
 
-    def operator_ne(self, app_data: float | int | str, test_data: float | int | str) -> tuple:
+    def operator_ne(self, app_data: float | str, test_data: float | str) -> tuple:
         """Compare app data is not equal to tests data.
 
         Args:
@@ -585,7 +554,7 @@ class ValidatorABC(ABC):
         if self.check_null(app_data):
             return False, f'Invalid app_data: {app_data}. One or more values in app_data is null.'
 
-        if isinstance(app_data, (bytes, dict)):
+        if isinstance(app_data, (bytes | dict)):
             return False, 'Invalid app_data, bytes or dict types are not supported.'
 
         if not isinstance(app_data, list):

@@ -1,5 +1,4 @@
 """TcEx Framework Module"""
-# pylint: disable=too-many-lines
 
 # standard library
 import json
@@ -122,7 +121,7 @@ class Interactive:
             if self.lj.has_layout:
                 # using inputs from layout.json since they are required to be in order
                 # (display field can only use inputs previously defined)
-                for name in self.layout_inputs(self.lj.model).keys():  # type: ignore
+                for name in self.layout_inputs(self.lj.model):  # type: ignore
                     # get data from install.json based on name
                     data = install_inputs[name]
                     yield name, data
@@ -140,10 +139,9 @@ class Interactive:
                 # inputs that are serviceConfig are not applicable for profiles
                 continue
 
-            if not data.hidden:
-                # each input will be checked for permutations if the App has layout and not hidden
-                if not self.permutation.validate_input_variable(name, inputs):
-                    continue
+            # each input will be checked for permutations if the App has layout and not hidden
+            if not data.hidden and not self.permutation.validate_input_variable(name, inputs):
+                continue
 
             # present the input
             value = self.input_type_map[data.type.lower()](name, data)
@@ -175,14 +173,17 @@ class Interactive:
 
         option_default = 'false'
         option_text = ''
+
+        # format the options to display to the user
         options = []
         for v in valid_values:
             # in install.json all default values should be a string (e.g., "true" or "false")
             if v.lower() == str(default).lower():
                 option_default = v
-                v = f'[{v}]'
-            options.append(v)
-        option_text = f'''({'/'.join(options)})'''
+                options.append(f'[{v}]')
+            else:
+                options.append(v)
+        option_text = f'({"/".join(options)})'
 
         input_data_dict = data.dict()
         input_data_dict['default'] = option_default
@@ -322,7 +323,7 @@ class Interactive:
         data_type = None
         while not data_type:
             index = (
-                self.collect._input_value(  # pylint: disable=protected-access
+                self.collect._input_value(  # noqa: SLF001
                     label=f'Select a [{self.accent}]Data Type[/{self.accent}]', option_text='0'
                 )
                 or 0
@@ -391,7 +392,8 @@ class Interactive:
 
         default = self.util.get_default(data)  # array of default values
         if not isinstance(default, list):
-            raise RuntimeError(f'Invalid default value for {name} ({default}).')
+            ex_msg = f'Invalid default value for {name} ({default}).'
+            raise RuntimeError(ex_msg)  # noqa: TRY004
 
         option_indexes = [0]
         valid_values = self.util.expand_valid_values(data.valid_values)
@@ -413,10 +415,10 @@ class Interactive:
                         continue
 
                     Render.panel.failure(
-                        f'''Invalid value of ({d}) for {data.name}, check that '''
+                        f'Invalid value of ({d}) for {data.name}, check that '
                         'default value(s) and validValues match in install.json.'
                     )
-        option_text = f''' [{','.join([str(v) for v in option_indexes])}]'''
+        option_text = f' [{",".join([str(v) for v in option_indexes])}]'
 
         Render.panel.column_index(valid_values, 'Options')
 

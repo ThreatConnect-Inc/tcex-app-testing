@@ -1,11 +1,11 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
-import os
 import sys
-import traceback
 from abc import ABC
-from datetime import datetime
+from datetime import UTC, datetime
+from pathlib import Path
 
 # third-party
 import urllib3
@@ -21,7 +21,7 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)  # type: ign
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
 
 
-class TestCaseABC(ABC):
+class TestCaseABC(ABC):  # noqa: B024
     """Base TestCase Class"""
 
     # an instance of the App when running in threaded mode
@@ -48,7 +48,8 @@ class TestCaseABC(ABC):
 
     def run(self):
         """Implement in Child Class"""
-        raise NotImplementedError('Child class must implement this method.')
+        ex_msg = 'Child class must implement this method.'
+        raise NotImplementedError(ex_msg)
 
     def run_app_method(self, app, method):
         """Run the provided App method."""
@@ -61,14 +62,13 @@ class TestCaseABC(ABC):
                 and self.aux.profile_runner
                 and e.code not in self.aux.profile_runner.model.exit_codes
             ):
-                self.log.error(f'step=run, event=app-failed, exit-code={e.code}, method={method}')
-            app.tce.log.info(f'Exit Code: {e.code}')
+                self.log.error(  # noqa: TRY400
+                    f'step=run, event=app-failed, exit-code={e.code}, method={method}'
+                )
+            app.tcex.log.info(f'Exit Code: {e.code}')
             return e.code
         except Exception:
-            self.log.error(
-                'step=run, event=app-method-encountered-exception, '
-                f'method={method}, exception={traceback.format_exc()}'
-            )
+            self.log.exception(f'step=run, event=app-method-encountered-exception, method={method}')
             return 1
         return 0
 
@@ -78,38 +78,39 @@ class TestCaseABC(ABC):
 
         cls.initialized = True
         cls.log.info('Setup Class')
-        cls.log.info(f'step=setup-class, event=started, datetime={datetime.now().isoformat()}')
+        cls.log.info(f'step=setup-class, event=started, datetime={datetime.now(UTC).isoformat()}')
 
-    # pylint: disable=protected-access
     def setup_method(self):
         """Run before each test method runs."""
 
         self.log.info(config_model.current_test)
-        self.log.info(f'step=setup-method, event=started, datetime={datetime.now().isoformat()}')
+        self.log.info(f'step=setup-method, event=started, datetime={datetime.now(UTC).isoformat()}')
 
         # create and log current context
-        self.aux.tc_playbook_kvstore_context = self.aux._get_tc_playbook_kvstore_context
+        self.aux.tc_playbook_kvstore_context = self.aux._get_tc_playbook_kvstore_context  # noqa: SLF001
         self.log.info(
             f'step=setup-method, event=get-context, context={self.aux.tc_playbook_kvstore_context}'
         )
 
         # clear cache, etc between test cases in tcex
         if 'tcex.pleb.cached_property' in sys.modules:
-            sys.modules['tcex.pleb.cached_property'].cached_property._reset()
+            sys.modules['tcex.pleb.cached_property'].cached_property._reset()  # noqa: SLF001
         if 'tcex.pleb.scoped_property' in sys.modules:
-            sys.modules['tcex.pleb.scoped_property'].scoped_property._reset()
+            sys.modules['tcex.pleb.scoped_property'].scoped_property._reset()  # noqa: SLF001
         if 'tcex.registry' in sys.modules:
-            sys.modules['tcex.registry'].registry._reset()
+            sys.modules['tcex.registry'].registry._reset()  # noqa: SLF001
 
         # Adding this for batch to created the -batch and errors files
-        os.makedirs(os.path.join(config_model.test_case_log_test_dir, 'DEBUG'), exist_ok=True)
+        (Path(config_model.test_case_log_test_dir) / 'DEBUG').mkdir(parents=True, exist_ok=True)
 
     @classmethod
     def teardown_class(cls):
         """Run once before all test cases."""
         cls.initialized = False
         cls.log.info('Teardown Class')
-        cls.log.info(f'step=teardown-class, event=finished, datetime={datetime.now().isoformat()}')
+        cls.log.info(
+            f'step=teardown-class, event=finished, datetime={datetime.now(UTC).isoformat()}'
+        )
 
     def teardown_method(self):
         """Run after each test method runs."""
@@ -125,7 +126,7 @@ class TestCaseABC(ABC):
             self.aux.profile_runner.update.initialized()
 
             self.log.info(
-                f'step=teardown-method, event=finished, datetime={datetime.now().isoformat()}'
+                f'step=teardown-method, event=finished, datetime={datetime.now(UTC).isoformat()}'
             )
 
         # clear cache for playbook, stager, validator property

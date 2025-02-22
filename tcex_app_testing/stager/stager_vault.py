@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 import os
@@ -36,7 +37,8 @@ class StagerVault:
         staged_data = {}
         for key, url in vault_data.items():
             if key in staged_data:
-                raise RuntimeError(f'Vault variable {key} is already staged.')
+                ex_msg = f'Vault variable {key} is already staged.'
+                raise RuntimeError(ex_msg)
             staged_data[key] = self.read_from_vault(url)
 
         return staged_data
@@ -48,7 +50,7 @@ class StagerVault:
         vault_addr = os.getenv('VAULT_ADDR') or os.getenv('VAULT_URL')
 
         if any(value is None for value in [vault_token, vault_addr]):
-            raise VaultTokenError()
+            raise VaultTokenError
 
         return hvac.Client(url=vault_addr, token=vault_token)
 
@@ -77,15 +79,15 @@ class StagerVault:
                 path=url, mount_point=mount_point
             )
         except InvalidPath:
-            self.log.error(f'step=setup, event=env-store-invalid-path, path={url}')
+            self.log.exception(f'step=setup, event=env-store-invalid-path, path={url}')
             Render.panel.failure(f'Error reading from Vault for path {url}. Path was not found.')
-        except VaultError as e:
-            self.log.error(f'step=setup, event=env-store-error-reading-path, path={url}, error={e}')
+        except VaultError:
+            self.log.exception(f'step=setup, event=env-store-error-reading-path, path={url}')
             Render.panel.failure(
                 f'Error reading from Vault for path {url}. Check access and credentials.'
             )
         except Exception as e:
-            self.log.error('step=setup, event=env-store-generic-failure')
+            self.log.exception('step=setup, event=env-store-generic-failure')
             Render.panel.failure(f'Error reading from Vault for path {url}: {e}.')
 
         return data.get('data', data).get('data', data)

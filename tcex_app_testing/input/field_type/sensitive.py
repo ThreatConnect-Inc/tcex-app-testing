@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 from collections.abc import Generator
@@ -13,9 +14,7 @@ from tcex_app_testing.input.field_type.exception import (
     InvalidLengthValue,
     InvalidType,
 )
-from tcex_app_testing.logger.sensitive_filter import (
-    SensitiveFilter,  # pylint: disable=no-name-in-module
-)
+from tcex_app_testing.logger.sensitive_filter import SensitiveFilter
 from tcex_app_testing.util.variable import BinaryVariable
 
 # get logger
@@ -70,7 +69,7 @@ class Sensitive:
 
     def __repr__(self) -> str:
         """."""
-        return f'''Sensitive('{self}')'''
+        return f"Sensitive('{self}')"
 
     def __str__(self) -> str:
         """Return the value masked.
@@ -79,9 +78,14 @@ class Sensitive:
         than X, then show the first and last character of the value. This is very
         helpful in debugging App where the incorrect credential could have been passed.
         """
-        if self._sensitive_value and _logger.getEffectiveLevel() <= 10:  # DEBUG or TRACE
-            if isinstance(self.value, str) and len(self.value) >= 10:
-                return f'''{self.value[:1]}{'*' * 4}{self.value[-1:]}'''
+        trace_logging_level = 10
+        if (
+            self._sensitive_value
+            and _logger.getEffectiveLevel() <= trace_logging_level
+            and isinstance(self.value, str)
+            and len(self.value) >= trace_logging_level
+        ):
+            return f'{self.value[:1]}{"*" * 4}{self.value[-1:]}'
         return '**********'
 
     @classmethod

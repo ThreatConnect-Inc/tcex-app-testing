@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 
@@ -27,7 +28,8 @@ class StagerThreatconnect:
             staged_data.setdefault(root_key, {})
             for key, data in root_value.items():
                 if key in staged_data:
-                    raise RuntimeError(f'ThreatConnect variable {key} is already staged.')
+                    ex_msg = f'ThreatConnect variable {key} is already staged.'
+                    raise RuntimeError(ex_msg)
                 staged_data[root_key][f'{key}'] = self.stage_data(root_key, data)
 
         return staged_data
@@ -68,7 +70,7 @@ class StagerThreatconnect:
         """Cleanup staged data in ThreatConnect."""
         for root_key, root_value in staged_data.items():
             for data in root_value.values():
-                response = self.session.delete(f'''/v3/{root_key}/{data.get('id')}''')
+                response = self.session.delete(f'/v3/{root_key}/{data.get("id")}')
                 if not response.ok:
                     Render.panel.error(f'Failed to cleanup data {data} in ThreatConnect.')
                     self.log.error(

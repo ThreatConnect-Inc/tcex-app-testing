@@ -7,6 +7,8 @@
 -   APP-4725 - Updated dependencies for inflect and typer
 -   APP-4726 - Updated default values for a few app inputs
 -   APP-4727 - Renamed aux.py file to aux_.py to handle restriction on windows
+-   APP-4735 - Migrated to "uv" for package management
+-   APP-4736 - Switched linters to "ruff" (including linting fixes)
 
 ### 1.0.0
 

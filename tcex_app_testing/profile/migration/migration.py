@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 from abc import ABC, abstractmethod
@@ -22,7 +23,8 @@ class MigrationABC(ABC):
         self.log = _logger
 
         if start_version >= end_version:
-            raise RuntimeError('Migration start version must be less than end version.')
+            ex_msg = 'Migration start version must be less than end version.'
+            raise RuntimeError(ex_msg)
 
     @abstractmethod
     def migrate(self, contents: dict) -> dict:

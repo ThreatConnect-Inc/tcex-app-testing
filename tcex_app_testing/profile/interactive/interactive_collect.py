@@ -89,11 +89,14 @@ class InteractiveCollect:
             array_type=input_data_model.array_type,
             option_text=input_data_model.option_text,
         )
-        if not input_value:
-            # if no default value and required force user to input again
-            if input_data_model.default is None and input_data_model.required is True:
-                Render.panel.error('This input is required, please enter an appropriate value.')
-                return self.binary(input_data_model)
+        # if no default value and required force user to input again
+        if (
+            not input_value
+            and input_data_model.default is None
+            and input_data_model.required is True
+        ):
+            Render.panel.error('This input is required, please enter an appropriate value.')
+            return self.binary(input_data_model)
 
         if input_value not in [None, '']:
             input_value = b64encode(input_value.encode()).decode()
@@ -139,9 +142,7 @@ class InteractiveCollect:
         input_value = cast(str, input_value)
 
         # convert input value to a proper boolean
-        input_value = Util.to_bool(input_value)
-
-        return input_value
+        return Util.to_bool(input_value)
 
     def editchoice(self, input_data_model: InteractiveParamsModel) -> str | None:
         """Collect edit choice data."""
@@ -205,7 +206,7 @@ class InteractiveCollect:
 
         # set default value if no input provided (default can only be int or str)
         if not input_value and (
-            input_data_model.default is None or isinstance(input_data_model.default, (int, str))
+            input_data_model.default is None or isinstance(input_data_model.default, int | str)
         ):
             input_value = input_data_model.default
 
@@ -252,12 +253,7 @@ class InteractiveCollect:
         return input_value
 
     def exit_code(self, **kwargs) -> int | None:
-        """Collect exit codes.
-
-        Args:
-            array_type (bool, kwargs): If True the user can provide multiple values.
-            option_text (str, kwargs): The text shown to the user.
-        """
+        """Collect exit codes."""
         array_type = kwargs.get('array_type', False)
         option_text = kwargs.get('option_text')
 
@@ -359,14 +355,7 @@ class InteractiveCollect:
             input_data_model.required = False
 
         input_values = list(set(input_values))
-        if input_values:
-            # format multichoice value as pipe delimited string
-            input_values = '|'.join(input_values)
-        else:
-            # return None to ensure data doesn't get added to inputs
-            input_values = None
-
-        return input_values
+        return '|'.join(input_values) if input_values else None
 
     def string(self, input_data_model: InteractiveParamsModel) -> str | None:
         """Collect string data."""

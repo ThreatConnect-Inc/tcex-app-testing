@@ -1,6 +1,4 @@
 """TcEx Framework Module"""
-# standard library
-import os
 
 # first-party
 from tcex_app_testing.config_model import config_model
@@ -16,8 +14,8 @@ class TemplatesTests(TemplatesABC):
         self.log.info(f'Rendering {filename} template to {config_model.test_case_dir}')
 
         # render the template
-        fqfn = os.path.join(config_model.test_case_dir, filename)
-        self.render(f'{filename}.tpl', fqfn, overwrite=True)
+        fqfn = config_model.test_case_dir / filename
+        self.render(f'{filename}.tpl', str(fqfn), overwrite=True)
 
     def custom_py(self):
         """Render the custom.py template."""
@@ -28,8 +26,8 @@ class TemplatesTests(TemplatesABC):
         variables = {'runtime_level': self.ij.model.runtime_level.lower()}
 
         # render the template
-        fqfn = os.path.join(config_model.test_case_dir, filename)
-        self.render(f'{filename}.tpl', fqfn, variables)
+        fqfn = config_model.test_case_dir / filename
+        self.render(f'{filename}.tpl', str(fqfn), variables)
 
     def init_py(self):
         """Render template file."""
@@ -40,8 +38,8 @@ class TemplatesTests(TemplatesABC):
         variables = {'type': 'Suite'}
 
         # render the template
-        fqfn = os.path.join(config_model.test_case_dir, filename)
-        self.render(f'{filename}.tpl', fqfn, variables, overwrite=True)
+        fqfn = config_model.test_case_dir / filename
+        self.render(f'{filename}.tpl', str(fqfn), variables, overwrite=True)
 
     def render_templates(self):
         """Render all templates"""
@@ -68,8 +66,8 @@ class TemplatesTests(TemplatesABC):
             }
 
             # render the template
-            fqfn = os.path.join(config_model.test_case_dir, filename)
-            self.render(f'{filename}.tpl', fqfn, variables, overwrite=True)
+            fqfn = config_model.test_case_dir / filename
+            self.render(f'{filename}.tpl', str(fqfn), variables, overwrite=True)
 
     def validate_custom_py(self):
         """Render the validate_custom.py template."""
@@ -88,5 +86,5 @@ class TemplatesTests(TemplatesABC):
             }
 
             # render the template
-            fqfn = os.path.join(config_model.test_case_dir, filename)
-            self.render(f'{filename}.tpl', fqfn, variables)
+            fqfn = config_model.test_case_dir / filename
+            self.render(f'{filename}.tpl', str(fqfn), variables)

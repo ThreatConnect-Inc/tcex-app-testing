@@ -1,8 +1,9 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
-import os
 import zipfile
+from pathlib import Path
 
 # third-party
 from mako.template import Template
@@ -23,7 +24,7 @@ class TemplatesABC:
         """Initialize class properties."""
 
         # properties
-        self._base_dir = os.path.abspath(os.path.dirname(__file__))
+        self._base_dir = Path(__file__).resolve().parent
         self.ij = InstallJson()
         self.log = _logger
         self.results = []
@@ -43,28 +44,29 @@ class TemplatesABC:
         """Convert #App:1234:variable!type -> variable_type"""
         variable_model = self.util.get_playbook_variable_model(variable)
         if variable_model is None:
-            raise RuntimeError(f'Invalid variable {variable}')
-        return f'''{variable_model.key.replace('.', '_')}_{variable_model.type.lower()}'''
+            ex_msg = f'Invalid variable {variable}'
+            raise RuntimeError(ex_msg)
+        return f'{variable_model.key.replace(".", "_")}_{variable_model.type.lower()}'
 
     def get_template(self, filename: str) -> str:
         """Get the specified file, optionally out of an egg in the path."""
-        fqfn = os.path.join(self._base_dir, filename)
+        fqfn = self._base_dir / filename
         self.log.info(f'get_template: {fqfn}')
 
         egg_path = []
         internal_path = []
 
         in_egg = False
-        for part in fqfn.split('/'):
+        for part in fqfn.parts:
             if not in_egg:
                 egg_path.append(part)
-                if part.endswith('.zip') or part.endswith('.egg'):
+                if part.endswith(('.zip', '.egg')):
                     in_egg = True
             else:
                 internal_path.append(part)
 
         if not in_egg:
-            with open(fqfn, encoding='utf-8') as fh:
+            with fqfn.open(encoding='utf-8') as fh:
                 return fh.read()
 
         egg = zipfile.ZipFile('/'.join(egg_path), mode='r')  # pylint: disable=consider-using-with
@@ -87,12 +89,13 @@ class TemplatesABC:
         variables = variables or {}
 
         status = '[red]Failed[/red]'
-        if not os.path.isfile(destination) or overwrite:
+        destination_file = Path(destination)
+        if not destination_file.is_file() or overwrite:
             template_data = self.get_template(template_name)
             template = Template(template_data)  # nosec
             rendered_template = template.render(**variables)
             self.log.debug(f'template-destination={destination}')
-            with open(destination, 'w', encoding='utf-8') as f:
+            with destination_file.open(mode='w', encoding='utf-8') as f:
                 f.write(CodeOperation.format_code(rendered_template))
             status = '[green]Success[/green]'
         else:

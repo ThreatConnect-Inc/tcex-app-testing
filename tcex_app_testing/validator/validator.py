@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 from collections.abc import Callable
@@ -49,13 +50,7 @@ class Validator(ValidatorABC):
         op: str | None = None,
         **kwargs: dict | list | str,
     ) -> tuple:
-        """Compare app_data to test data.
-
-        Args:
-            app_data: The data from the App.
-            test_data: The validation data from the test case.
-            op: The comparison operator expression. Defaults to "eq".
-        """
+        """Compare app_data to test data."""
         # remove comment field from kwargs if it exists
         if 'comment' in kwargs:
             del kwargs['comment']
@@ -125,7 +120,7 @@ class Validator(ValidatorABC):
             'startswith': self.operator_startswith,
             'sw': self.operator_startswith,
         }
-        return operators.get(op, None)
+        return operators.get(op, None)  # noqa: SIM910
 
     @cached_property
     def kvstore(self) -> ValidatorKvstore:
@@ -170,7 +165,8 @@ class Validator(ValidatorABC):
             return {}
 
         if not isinstance(dict_1, dict):
-            raise RuntimeError(f'Provided value ({dict_1}) must be a dict.')
+            ex_msg = f'Provided value ({dict_1}) must be a dict.'
+            raise RuntimeError(ex_msg)  # noqa: TRY004
 
         path_0 = paths[0]
         if len(paths) == 1:
@@ -216,7 +212,7 @@ class Validator(ValidatorABC):
                 db_data_truncated = []
                 for d in data:
                     if d is not None and isinstance(d, str) and len(d) > truncate:
-                        db_data_truncated.append(f'{d[:self.truncate]} ...')
+                        db_data_truncated.append(f'{d[: self.truncate]} ...')
                     else:
                         db_data_truncated.append(d)
                 return db_data_truncated

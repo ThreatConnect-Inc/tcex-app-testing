@@ -31,16 +31,21 @@ class StagerKvstore:
         """Stage redis data from dict"""
         for variable, data in staging_data.items():
             variable_type = self.playbook.get_variable_type(variable)
-
             self.log.info(f'step=stage, data=from-dict, variable={variable}, value={data}')
-            if data is not None and variable_type == 'Binary':
-                data = self._decode_binary(data, variable)
-            elif data is not None and variable_type == 'BinaryArray':
-                data = [self._decode_binary(d, variable) for d in data]
 
             if data is not None:
+                if variable_type == 'Binary':
+                    data_ = self._decode_binary(data, variable)
+                elif variable_type == 'BinaryArray':
+                    data_ = [self._decode_binary(d, variable) for d in data]
+                else:
+                    data_ = data
+
                 self.playbook.create.any(
-                    variable, data, validate=False, when_requested=False  # type: ignore
+                    variable,
+                    data_,  # type: ignore
+                    validate=False,
+                    when_requested=False,  # type: ignore
                 )
 
     def stage(

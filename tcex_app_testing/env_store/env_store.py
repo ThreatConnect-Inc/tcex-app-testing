@@ -148,18 +148,16 @@ class EnvStore(metaclass=Singleton):
                 path=path, mount_point=mount_point
             )
         except InvalidPath:
+            self.log.exception(f'step=setup, event=env-store-invalid-path, path={path}')
             Render.panel.warning(f'Error reading from Vault for path {path}. Path was not found.')
-            self.log.error(f'step=setup, event=env-store-invalid-path, path={path}')
-        except VaultError as e:
+        except VaultError:
+            self.log.exception(f'step=setup, event=env-store-error-reading-path, path={path}')
             Render.panel.warning(
                 f'Error reading from Vault for path {path}. Check access and credentials.'
             )
-            self.log.error(
-                f'step=setup, event=env-store-error-reading-path, path={path}, error={e}'
-            )
         except Exception:
+            self.log.exception('step=setup, event=env-store-generic-failure')
             Render.panel.warning(f'Error reading from Vault for path {path}.')
-            self.log.error('step=setup, event=env-store-generic-failure')
 
         return data.get('data', {}).get('data', {}).get(key) or default
 

@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 import logging
@@ -7,6 +8,7 @@ import random
 import re
 import string
 import time
+from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
@@ -176,18 +178,18 @@ class Aux:
         encrypted_data = self.util.encrypt_aes_cbc(key, data)
 
         # ensure that the in directory exists
-        os.makedirs(config['tc_in_path'], exist_ok=True)
+        Path(config['tc_in_path']).mkdir(parents=True, exist_ok=True)
 
         # write the file in/.app_params.json
-        app_params_json = os.path.join(config['tc_in_path'], '.test_app_params.json')
-        with open(app_params_json, 'wb') as fh:
+        app_params_json = Path(config['tc_in_path']) / '.test_app_params.json'
+        with app_params_json.open('wb') as fh:
             fh.write(encrypted_data)
 
         # when the App is launched the tcex.input module reads the encrypted
         # file created above # for inputs. in order to decrypt the file, this
         # process requires the key and filename to be set as environment variables.
         os.environ['TC_APP_PARAM_KEY'] = key
-        os.environ['TC_APP_PARAM_FILE'] = app_params_json
+        os.environ['TC_APP_PARAM_FILE'] = str(app_params_json)
 
     def create_config_update(
         self, app_inputs: dict[str, int | list | str | None]
@@ -226,7 +228,7 @@ class Aux:
             app_inputs=app_inputs,
             monkeypatch=monkeypatch,
             pytestconfig=pytestconfig,
-            redis_client=self.app.key_value_store.redis_client,  # pylint: disable=no-member
+            redis_client=self.app.key_value_store.redis_client,
             tcex_testing_context=self.tcex_testing_context,
         )
 
@@ -252,10 +254,7 @@ class Aux:
 
     def stage_and_replace(self, stage_key, data, stage_function, fail_on_error=True):
         """Stage and replace data."""
-        if data is not None:
-            staged_data = stage_function(data)
-        else:
-            staged_data = stage_function()
+        staged_data = stage_function(data) if data is not None else stage_function()
         self.staged_data.update({stage_key: staged_data})
         self.replace_variables(fail_on_error=fail_on_error)
 
@@ -280,11 +279,10 @@ class Aux:
         for key, value in self.staged_data.items():
             staged_data.append(f'---{key}---')
             if key.lower() == 'env':
-                staged_data.extend(sorted(list(value.keys())))
+                staged_data.extend(sorted(value.keys()))
             else:
-                value = self.flatten_dict(value)
-                value = sorted(list({key_ for key_, value_ in value.items() if value_}))
-                staged_data.extend(value)
+                value_ = sorted({k_ for k_, v_ in self.flatten_dict(value).items() if v_})
+                staged_data.extend(value_)
         self.log.info('step=run, event=staged-data')
         self.log.info('\n'.join(staged_data))
         Render.panel.info('\n'.join(staged_data))
@@ -367,7 +365,7 @@ class Aux:
         **Example Response**
         ::
 
-            {"http": "http://user:pass@10.10.1.10:3128/"}
+            {'http': 'http://user:pass@10.10.1.10:3128/'}
         """
         return proxies(
             proxy_host=config_model.tc_proxy_host,
@@ -425,7 +423,6 @@ class Aux:
     @cached_property
     def stager(self):
         """Return instance of Stager class."""
-        # pylint: disable=no-member
         return Stager(self.playbook, self.app.key_value_store.redis_client, self.session_tc)
 
     @property
@@ -435,13 +432,14 @@ class Aux:
             return None
 
         data = None
+        http_success = 200
         token = None
         # defaulting to api token
         token_type = 'api'  # nosec
 
         # retrieve token from API using HMAC auth
         r = self.session_exchange.post(f'/internal/token/{token_type}', json=data, verify=True)
-        if r.status_code == 200:
+        if r.status_code == http_success:
             token = r.json().get('data')
             self.log.info(
                 f'step=setup, event=using-token, token={token}, token-elapsed={r.elapsed}'
@@ -475,18 +473,18 @@ class Aux:
                     )
                     assert passed, assert_error  # nosec
                 else:
-                    assert False, 'The message.tc file was empty.'  # nosec
+                    pytest.fail('The message.tc file was empty.')
             else:
-                assert (  # nosec
-                    False
-                ), f'No message.tc file found at ({config_model.test_case_message_tc_filename}).'
+                pytest.fail(
+                    f'No message.tc file found at ({config_model.test_case_message_tc_filename}).'
+                )
 
     @property
     def validator(self):
         """Return instance of Stager class."""
         return Validator(
             self.playbook,
-            self.app.key_value_store.redis_client,  # pylint: disable=no-member
+            self.app.key_value_store.redis_client,
             self.session_tc,
             config_model.tc_temp_path,
         )

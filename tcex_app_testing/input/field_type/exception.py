@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 
@@ -45,7 +46,6 @@ class InvalidEntityType(BaseTypeError):
 class InvalidInput(BaseValueError):
     """Raise customized exception."""
 
-    # pylint: disable=useless-super-delegation
     def __init__(self, field_name: str, error: str):
         """Customize the exception message."""
         super().__init__(field_name, error)

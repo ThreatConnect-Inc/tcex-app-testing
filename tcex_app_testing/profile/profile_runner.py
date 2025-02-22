@@ -87,12 +87,14 @@ class ProfileRunner(Profile):
     @property
     def context_tracker(self) -> list[str]:
         """Return the current context trackers for Service Apps."""
-        if not self._context_tracker:
-            if self.tcex_testing_context:
-                self._context_tracker = json.loads(
-                    self.redis_client.hget(self.tcex_testing_context, '_context_tracker')
-                    or '[]'  # type: ignore
+        if not self._context_tracker and self.tcex_testing_context:
+            self._context_tracker = json.loads(
+                self.redis_client.hget(
+                    self.tcex_testing_context,
+                    '_context_tracker',  # type: ignore
                 )
+                or '[]'
+            )
         return self._context_tracker
 
     def validate(self):

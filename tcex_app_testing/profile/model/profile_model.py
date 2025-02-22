@@ -1,5 +1,5 @@
 """TcEx Framework Module"""
-# pylint: disable=no-self-argument
+
 # standard library
 import json
 from collections.abc import Iterator
@@ -103,7 +103,7 @@ class ProfileModel(BaseModel):
     exit_message: ExitMessageModel = Field(..., description='')
     inputs: InputsModel = Field(..., description='One of more inputs for the App.')
     initialized: bool = Field(
-        False,
+        default=False,
         description='True, if test profile has been initialized with exit message and outputs.',
     )
     outputs: dict | None = Field(
@@ -127,21 +127,24 @@ class ProfileModel(BaseModel):
     )
 
     @validator('exit_message', always=True, pre=True)
+    @classmethod
     def _exit_message(cls, v):
         if not v:
-            return ExitMessageModel(**{})
+            return ExitMessageModel(**{})  # noqa: PIE804
         return v
 
     @validator('inputs', always=True, pre=True)
+    @classmethod
     def _inputs(cls, v):
         if not v:
-            return InputsModel(**{})
+            return InputsModel(**{})  # noqa: PIE804
         return v
 
     @validator('stage', always=True, pre=True)
+    @classmethod
     def _stage(cls, v):
         if not v:
-            return StageModel(**{})
+            return StageModel(**{})  # noqa: PIE804
         return v
 
     class Config:
@@ -189,8 +192,9 @@ class ProfileModel(BaseModel):
         _resolved = {}
         for name, value in self.inputs_flattened.items():
             if util.is_playbook_variable(value) is True:
-                value = self.stage.kvstore.get(value, value)
-            _resolved[name] = value
+                _resolved[name] = self.stage.kvstore.get(value, value)
+            else:
+                _resolved[name] = value
         return _resolved
 
     def ordered_json(

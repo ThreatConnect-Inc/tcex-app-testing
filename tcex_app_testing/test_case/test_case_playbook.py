@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import os
 import subprocess  # nosec
@@ -16,15 +17,14 @@ class TestCasePlaybook(TestCasePlaybookCommon):
     def run(self) -> int:
         """Run the Playbook App."""
         # third-party
-        from run import Run  # type: ignore # pylint: disable=import-error,import-outside-toplevel
+        from run import Run  # type: ignore
 
         # run the app
         exit_code = 0
         try:
             # FIXME need a better "reset tcex" mechanism
-            # pylint: disable=protected-access
             if 'tcex.pleb.registry' in sys.modules:
-                sys.modules['tcex.registry'].registry._reset()
+                sys.modules['tcex.registry'].registry._reset()  # noqa: SLF001
 
             run = Run()
             run.setup()
@@ -64,7 +64,6 @@ class TestCasePlaybook(TestCasePlaybookCommon):
             sys.argv = sys_argv_orig
         elif self.run_method == 'subprocess':
             # run the Service App as a subprocess
-            # pylint: disable=consider-using-with
             app_process = subprocess.Popen(['python', 'run.py'])  # nosec
             exit_code = app_process.wait()
 

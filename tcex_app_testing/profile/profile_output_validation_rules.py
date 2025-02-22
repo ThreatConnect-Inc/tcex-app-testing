@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import hashlib
 import json
@@ -24,11 +25,12 @@ class ProfileOutputValidationRules:
     @staticmethod
     def _hash_value(value):
         """Return the SHA256 hash of the given value."""
-        if isinstance(value, (bytes, bytearray)):
+        if isinstance(value, bytes | bytearray):
             return hashlib.sha256(value).hexdigest()
         if isinstance(value, str):
             return hashlib.sha256(value.encode('utf-8')).hexdigest()
-        raise RuntimeError(f'Tried to hash unsupported type: {type(value)}')
+        ex_msg = f'Tried to hash unsupported type: {type(value)}'
+        raise RuntimeError(ex_msg)
 
     def _matches_date_rule(self, outputs: Any) -> bool:
         """Return if output should use the is_date operator."""
@@ -68,7 +70,7 @@ class ProfileOutputValidationRules:
     @staticmethod
     def _matches_dd_rule(outputs):
         """Return if output should use the dd operator."""
-        return isinstance(outputs, (dict, list))
+        return isinstance(outputs, dict | list)
 
     @staticmethod
     def _matches_heq_rule(outputs):
@@ -78,9 +80,10 @@ class ProfileOutputValidationRules:
             1) The type is Binary
             2) The type is String and the length is > 1024
         """
+        max_hash_length = 1024
         return outputs is not None and (
-            isinstance(outputs, (bytes, bytearray))
-            or (isinstance(outputs, str) and len(outputs) > 1024)
+            isinstance(outputs, bytes | bytearray)
+            or (isinstance(outputs, str) and len(outputs) > max_hash_length)
         )
 
     @staticmethod
@@ -93,7 +96,7 @@ class ProfileOutputValidationRules:
             for output in outputs:
                 if not isinstance(output, str):
                     return False
-                if not isinstance(json.loads(output), (dict, list)):
+                if not isinstance(json.loads(output), dict | list):
                     return False
         except Exception:
             return False
@@ -135,7 +138,7 @@ class ProfileOutputValidationRules:
             return False
         return True
 
-    def generate_rule(self, data: Any) -> dict:  # pylint: disable=too-many-return-statements
+    def generate_rule(self, data: Any) -> dict:
         """Return the default output data for a given variable"""
 
         _rule = {'expected_output': data, 'op': 'eq'}

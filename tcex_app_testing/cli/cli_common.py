@@ -1,6 +1,8 @@
 """TcEx Framework Module"""
+
 # standard library
 import os
+from pathlib import Path
 
 # first-party
 from tcex_app_testing.cli.cli_abc import CliABC
@@ -39,9 +41,9 @@ class CliCommon(CliABC):
         tests/Build/test_profiles.py::TestProfiles::test_profiles[string-array]
         """
         if feature is not None and profile_name is not None:
-            pytest_current_test = os.path.join(
-                'tests',
-                feature,
-                f'tests_profile.py::TestProfile::test_profile[{profile_name}]',
+            pytest_current_test = (
+                Path('tests')
+                / feature
+                / f'tests_profile.py::TestProfile::test_profile[{profile_name}]'
             )
-            os.environ['PYTEST_CURRENT_TEST'] = pytest_current_test
+            os.environ['PYTEST_CURRENT_TEST'] = str(pytest_current_test)

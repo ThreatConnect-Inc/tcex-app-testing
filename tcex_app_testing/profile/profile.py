@@ -1,4 +1,5 @@
-"""TcEx Framework Module"""
+"""TcEx Framework Module"""  # noqa: A005
+
 # standard library
 import json
 import logging
@@ -131,7 +132,7 @@ class Profile:
                 with config_model.test_case_profile_filename.open(encoding='utf-8') as fh:
                     contents_raw = fh.read()
             except (OSError, ValueError):  # pragma: no cover
-                self.log.error(
+                self.log.exception(
                     'event=load-profile-contents, exception=failed-reading-file, '
                     f'filename={config_model.test_case_profile_filename}'
                 )
@@ -197,7 +198,7 @@ class Profile:
         for input_type in ['defaults', 'optional', 'required']:
             for _, v in _contents.get('inputs', {}).get(input_type, {}).items():
                 if isinstance(v, list):
-                    v = f'{self.ij.model.list_delimiter}'.join(v)
+                    v = f'{self.ij.model.list_delimiter}'.join(v)  # noqa: PLW2901
 
         if _updated is True:
             self.rewrite_contents(contents=_contents)
@@ -237,7 +238,8 @@ class Profile:
     def outputs_calculated(self) -> list[str]:
         """Return calculated output variables data."""
         if self.ij.model.playbook is None:
-            raise RuntimeError('playbook is not defined in install.json model.')
+            ex_msg = 'playbook is not defined in install.json model.'
+            raise RuntimeError(ex_msg)
 
         output_variables = self.ij.model.playbook.output_variables
         if self.lj.has_layout:
@@ -246,9 +248,7 @@ class Profile:
             )
 
         # take OutputVariablesModel and create variables (e.g. #App:0002:string_3!String)
-        output_variables = self.ij.create_output_variables(output_variables)
-
-        return output_variables
+        return self.ij.create_output_variables(output_variables)
 
     @property
     def outputs_dynamic(self) -> list[str]:
@@ -283,10 +283,9 @@ class Profile:
                 exclude_unset=False,
                 indent=2,
             )
-        except ValidationError as e:
-            self.log.error(
-                f'event=validation-error, error={e}, '
-                f'filename={config_model.test_case_profile_filename_rel}'
+        except ValidationError:
+            self.log.exception(
+                f'event=validation-error, filename={config_model.test_case_profile_filename_rel}'
             )
             Render.panel.failure(
                 f'Invalid profile: filename="{config_model.test_case_profile_filename_rel}"'

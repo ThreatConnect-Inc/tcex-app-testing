@@ -1,6 +1,8 @@
 """TcEx Framework Module"""
+
 # standard library
 import os
+from pathlib import Path
 
 # first-party
 from tcex_app_testing.cli.cli_common import CliCommon
@@ -13,11 +15,9 @@ class Update(CliCommon):
 
     def is_feature_directory(self, feature: str) -> bool:
         """Check if feature directory exists."""
-        feature_path = os.path.join('tests', feature)
+        feature_path = Path('tests') / feature
 
-        if not os.path.isdir(feature_path) or not os.path.isdir(
-            os.path.join(feature_path, 'profiles.d')
-        ):
+        if not feature_path.is_dir() or not (Path(feature_path) / 'profiles.d').is_dir():
             # not a feature directory
             return False
 

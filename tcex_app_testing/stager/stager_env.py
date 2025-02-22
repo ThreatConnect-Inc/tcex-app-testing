@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import os
 
@@ -12,7 +13,8 @@ class StagerEnv:
         staged_data = {}
         for var, value in os.environ.items():
             if var.lower() in staged_data:
-                raise RuntimeError(f'Environment variable {var} is already staged.')
+                ex_msg = f'Environment variable {var} is already staged.'
+                raise RuntimeError(ex_msg)
             staged_data[var.lower()] = value
 
         return staged_data
