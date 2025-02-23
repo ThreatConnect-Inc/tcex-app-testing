@@ -10,7 +10,7 @@ from pathlib import Path
 # third-party
 import requests
 import responses
-from pydantic import BaseModel
+from pydantic.v1 import BaseModel
 from responses import matchers
 
 # first-party

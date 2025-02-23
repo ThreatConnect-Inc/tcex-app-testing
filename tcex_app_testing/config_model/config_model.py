@@ -7,8 +7,8 @@ import re
 from pathlib import Path
 
 # third-party
-from pydantic import BaseModel, Field, validator
-from pydantic.fields import ModelField
+from pydantic.v1 import BaseModel, Field, validator
+from pydantic.v1.fields import ModelField
 
 # first-party
 from tcex_app_testing.app.config import InstallJson

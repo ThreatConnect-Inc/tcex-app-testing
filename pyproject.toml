@@ -29,7 +29,7 @@ dependencies = [
   "mako",
   "paho-mqtt<2.0.0",
   "pyaes",
-  "pydantic<2.0.0",
+  "pydantic (>=1.10.17,<3.0.0)",
   "pytest",
   "pytest-cov",
   "pytest-html",
