@@ -6,7 +6,7 @@ from collections.abc import Iterator
 from typing import Any
 
 # third-party
-from pydantic import BaseModel, Extra, Field, validator
+from pydantic.v1 import BaseModel, Extra, Field, validator
 
 # first-party
 from tcex_app_testing.app.config import InstallJson, LayoutJson, Permutation

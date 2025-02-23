@@ -6,7 +6,7 @@ from collections import OrderedDict
 from typing import Any
 
 # third-party
-from pydantic import ValidationError
+from pydantic.v1 import ValidationError
 
 # first-party
 from tcex_app_testing.app.config.install_json import InstallJson

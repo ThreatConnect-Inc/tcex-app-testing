@@ -1,7 +1,7 @@
 """TcEx Framework Module"""
 
 # third-party
-from pydantic import Field
+from pydantic.v1 import Field
 
 # first-party
 from tcex_app_testing.app.config.model.install_json_model import ParamsModel

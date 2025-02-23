@@ -4,7 +4,7 @@
 from typing import Any
 
 # third-party
-from pydantic import BaseModel, Field, validator
+from pydantic.v1 import BaseModel, Field, validator
 
 
 class AdvancedRequestModel(BaseModel):
