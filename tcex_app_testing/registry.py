@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import functools
 from collections.abc import Callable, Container
@@ -106,9 +107,10 @@ class Registry(Container):
         """Enable the syntax MyClass in registry."""
         try:
             self.__getattr__(item)
-            return True
         except RuntimeError:
             return False
+        else:
+            return True
 
     def _retrieve_registered_value(self, type_or_name):
         """Retrieve or create a value, if already registered."""
@@ -125,7 +127,8 @@ class Registry(Container):
 
             return value
 
-        raise RuntimeError(f'No provider for type: {key}')
+        ex_msg = f'No provider for type: {key}'
+        raise RuntimeError(ex_msg)
 
     def _reset(self):
         """Only used during testing to reset registry."""
@@ -143,7 +146,7 @@ class Registry(Container):
         """
 
         def _decorator(original: T) -> T:
-            setattr(original, 'factory_provider', (type_or_name, singleton))
+            setattr(original, 'factory_provider', (type_or_name, singleton))  # noqa: B010
             return original
 
         return _decorator

@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import copy
 
@@ -47,19 +48,18 @@ class Negative(CliCommon):
 
     def create_negative_profiles(self):
         """Create negative profiles using interactive profile base."""
-        # pylint: disable=too-many-nested-blocks
         for inputs in self.profile.model.profile_inputs:
-            for name, value in inputs.get('required', {}).items():
+            for name in inputs.get('required', {}):
                 ij_data = self.profile.ij.model.params_dict[name]
                 # create a profile for each pb data type
                 for pb_data_type in ij_data.playbook_data_type:
                     for negative_type in self.negative_inputs.get(pb_data_type.lower(), []):
                         # the value is pre-staged in test_case_playbook_common.py
-                        value = f'#App:1234:{negative_type}!{pb_data_type}'
+                        value_ = f'#App:1234:{negative_type}!{pb_data_type}'
                         profile_name = f'negative_{name}_{pb_data_type.lower()}_{negative_type}'
                         # modify copy so original is preserved for next interaction
                         new_inputs = copy.deepcopy(inputs)
-                        new_inputs['required'][name] = value
+                        new_inputs['required'][name] = value_
 
                         if 'fail_on_error' in inputs.get('optional', {}):
                             # handle fail on error

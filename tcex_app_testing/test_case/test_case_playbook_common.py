@@ -1,7 +1,9 @@
 """TcEx Framework Module"""
+
 # standard library
 import time
 import uuid
+from typing import ClassVar
 
 from .test_case_abc import TestCaseABC
 
@@ -9,7 +11,7 @@ from .test_case_abc import TestCaseABC
 class TestCasePlaybookCommon(TestCaseABC):
     """Playbook TestCase Class"""
 
-    redis_staging_data = {
+    redis_staging_data: ClassVar = {
         '#App:1234:empty!Binary': '',
         '#App:1234:empty!BinaryArray': [],
         # tcex won't let these be staged
@@ -60,7 +62,8 @@ class TestCasePlaybookCommon(TestCaseABC):
 
     def run(self):
         """Implement in Child Class"""
-        raise NotImplementedError('Child class must implement this method.')
+        ex_msg = 'Child class must implement this method.'
+        raise NotImplementedError(ex_msg)
 
     def stage_data(self, staged_data):
         """Stage the data in the profile."""
@@ -80,7 +83,7 @@ class TestCasePlaybookCommon(TestCaseABC):
             self.aux.profile_runner.update.outputs()
 
         # clear context tracker
-        self.aux.profile_runner._context_tracker = []  # pylint: disable=protected-access
+        self.aux.profile_runner._context_tracker = []  # noqa: SLF001
 
         # run test_case teardown_method
         super().teardown_method()

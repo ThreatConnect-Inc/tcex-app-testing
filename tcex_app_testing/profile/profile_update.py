@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 from typing import TYPE_CHECKING, Any
@@ -72,9 +73,10 @@ class ProfileUpdate:
                 continue
 
             # each non hidden input will be checked for permutations if the App has layout
-            if param.hidden is False:
-                if not self.permutation.validate_input_variable(param.name, inputs):
-                    continue
+            if param.hidden is False and not self.permutation.validate_input_variable(
+                param.name, inputs
+            ):
+                continue
 
             # get the correct profile value
             default_value = None if param.type.lower() != 'boolean' else param.default
@@ -112,7 +114,8 @@ class ProfileUpdate:
     def _output_updater(self) -> dict[str, Any]:
         """Update the outputs and return the updated results."""
         if self.redis_client is None:
-            raise RuntimeError('Redis client is not defined.')
+            ex_msg = 'Redis client is not defined.'
+            raise RuntimeError(ex_msg)
 
         outputs = {}
         for context in self.profile.context_tracker:
@@ -120,7 +123,7 @@ class ProfileUpdate:
             redis_data = self.redis_client.hgetall(context)
 
             # updated outputs with validation data
-            self._generate_output_data(outputs, redis_data)
+            self._generate_output_data(outputs, redis_data)  # type: ignore
 
             # cleanup redis
             self.profile.clear_context(context)

@@ -1,11 +1,12 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 import logging
 import os
 import re
 from collections import namedtuple
-from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 # third-party
 from packaging import version
@@ -15,11 +16,15 @@ from tcex_app_testing.pleb.cached_property import cached_property
 from tcex_app_testing.profile.migration.migration import MigrationABC
 from tcex_app_testing.render.render import Render
 
+if TYPE_CHECKING:
+    # standard library
+    from collections.abc import Callable
+
 # get logger
 _logger = logging.getLogger(__name__.split('.', maxsplit=1)[0])
 
 
-class Migration_1_0_0(MigrationABC):
+class Migration_1_0_0(MigrationABC):  # noqa: N801
     """Class for profile Migration methods management."""
 
     def __init__(self, content):
@@ -80,7 +85,7 @@ class Migration_1_0_0(MigrationABC):
     @staticmethod
     def _transform_tc_staged_data(root_type: str, data: dict) -> dict:
         """Transform tc staged data to match the new format."""
-        Transformation = namedtuple('Transformation', ['key', 'label'])
+        Transformation = namedtuple('Transformation', ['key', 'label'])  # noqa: PYI024
         transformations = [
             Transformation(key='tags', label='name'),
             Transformation(key='attributes', label=None),
@@ -114,8 +119,9 @@ class Migration_1_0_0(MigrationABC):
             if root_type in ['victims', 'cases', 'notes', 'artifacts']:
                 value.pop('type')
             transformed_tc_staged_data.setdefault(root_type, {})
-            value = self._transform_tc_staged_data(root_type, value)
-            transformed_tc_staged_data[root_type][key_] = value
+            transformed_tc_staged_data[root_type][key_] = self._transform_tc_staged_data(
+                root_type, value
+            )
             key_root_type_map[key_] = root_type
         contents['stage']['threatconnect'] = transformed_tc_staged_data
 

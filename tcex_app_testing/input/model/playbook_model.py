@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # third-party
 from pydantic import BaseModel, Field, validator
 
@@ -22,7 +23,8 @@ class PlaybookModel(BaseModel):
     )
 
     @validator('tc_playbook_out_variables', pre=True)
-    def parse_tc_playbook_out_variables(cls, v):  # pylint: disable=no-self-argument
+    @classmethod
+    def parse_tc_playbook_out_variables(cls, v):
         """Ensure value is an array."""
         if isinstance(v, str):
             v = v.split(',')

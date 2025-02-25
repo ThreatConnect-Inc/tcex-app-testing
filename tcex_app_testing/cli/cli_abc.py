@@ -1,25 +1,23 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
-import os
 from abc import ABC
 from pathlib import Path
 
 # first-party
-from tcex_app_testing.logger.rotating_file_handler_custom import (  # pylint: disable=no-name-in-module
-    RotatingFileHandlerCustom,
-)
+from tcex_app_testing.logger.rotating_file_handler_custom import RotatingFileHandlerCustom
 from tcex_app_testing.logger.trace_logger import TraceLogger
 from tcex_app_testing.pleb.cached_property import cached_property
 
 
-class CliABC(ABC):
+class CliABC(ABC):  # noqa: B024
     """Base Class for ThreatConnect command line tools."""
 
     @cached_property
     def cli_out_path(self) -> Path:
         """Return the path to the tcex cli command out directory."""
-        _out_path = Path(os.path.expanduser('~/.tcex'))
+        _out_path = Path.home() / '.tcex'
         _out_path.mkdir(exist_ok=True, parents=True)
         return _out_path
 

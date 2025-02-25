@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 
@@ -111,11 +112,8 @@ class ProfileMigrate:
                 if 'String' not in param_data.playbook_data_type and not isinstance(v, str):
                     continue
 
-                # convert input value to staged data
-                v = self._add_staging_data(contents, k, 'String', v)
-
-                # update input with new variable
-                contents['inputs'][input_type][k] = v
+                # convert input value to staged data and update input with new variable
+                contents['inputs'][input_type][k] = self._add_staging_data(contents, k, 'String', v)
 
                 # set migrated flag so profile will be rewritten
                 self.migrated = True
@@ -127,7 +125,7 @@ class ProfileMigrate:
             desired_version = ProfileModel.__fields__.get('schema_version').default  # type: ignore
             desired_version = version.parse(desired_version)
         except Exception:
-            self.log.error('Unable to parse desired version from ProfileModel.')
+            self.log.exception('Unable to parse desired version from ProfileModel.')
             Render.panel.failure('Unable to parse desired version from ProfileModel.')
 
         migrations = [migration(contents) for migration in self.migrations]

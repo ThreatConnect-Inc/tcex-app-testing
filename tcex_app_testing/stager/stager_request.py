@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import json
 import os
@@ -40,12 +41,13 @@ def response_callback(_, staged_request: StageRequestMethodModel, output_path: P
     responses.stop()
     output_file = output_path / Path(staged_request.output_file)
     if output_file.exists():
-        with open(output_file, encoding='utf-8') as f:
+        with output_file.open(encoding='utf-8') as f:
             data = f.read()
         returned_data = staged_request.status_code, staged_request.headers, data
     else:
         Render.panel.error(f'Output file does not exist: {output_file}')
-        raise RuntimeError(f'Output file does not exist: {output_file}')
+        ex_msg = f'Output file does not exist: {output_file}'
+        raise RuntimeError(ex_msg)
     responses.start()
     return returned_data
 
@@ -66,14 +68,12 @@ def generate_file_name(request, response) -> str:
 
     # Create a UUIDv5 by hashing the namespace and JSON data
     uuid5 = uuid.uuid5(namespace_uuid, json_data)
-    file_name = (
+    return (
         f'{request.method.lower()}-'
         f'{request.url.split("?")[0].split("/")[-1]}-'
         f'{uuid5}.'
         f'{file_extension}'
     )
-
-    return file_name
 
 
 def record_all_callback(request, recorded_data: dict, output_path: Path):
@@ -91,7 +91,7 @@ def record_all_callback(request, recorded_data: dict, output_path: Path):
         responses.start()
         return response.status_code, {}, response.text
     file_name = generate_file_name(request, response)
-    with open(output_path / Path(file_name), 'w', encoding='utf-8') as f:
+    with (output_path / file_name).open(mode='w', encoding='utf-8') as f:
         content = response.text
         if file_name.endswith('.json'):
             content = json.dumps(response.json())
@@ -152,31 +152,31 @@ class StagerRequest:
     def stage(self, request_data) -> None:
         """Stage redis data from dict"""
         for key, requests_ in request_data.items():
-            key = key.upper()
+            key_ = key.upper()
             for request in requests_:
-                request = StageRequestMethodModel(**request)
+                request_ = StageRequestMethodModel(**request)
 
                 match = []
                 match_querystring = False
-                if request.params is None:
-                    match = [matchers.query_param_matcher(request.params)]
+                if request_.params is None:
+                    match = [matchers.query_param_matcher(request_.params)]
                     match_querystring = True
 
                 callback = partial(
                     response_callback,
-                    staged_request=request,
+                    staged_request=request_,
                     output_path=self.output_path,
                 )
 
                 responses.add_callback(
-                    getattr(responses, key),
-                    url=request.url,
+                    getattr(responses, key_),
+                    url=request_.url,
                     callback=callback,  # type: ignore
                     match_querystring=match_querystring,
                 )
                 responses.add(
-                    method=key,
-                    url=request.url,
-                    status=request.status_code,
+                    method=key_,
+                    url=request_.url,
+                    status=request_.status_code,
                     match=match,
                 )

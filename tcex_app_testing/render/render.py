@@ -1,7 +1,7 @@
 """TcEx Framework Module"""
 
 # third-party
-from rich import print  # pylint: disable=redefined-builtin
+from rich import print as print_
 from rich.console import Console
 from rich.panel import Panel
 from rich.table import Table
@@ -22,7 +22,7 @@ class Render(RenderUtil):
         text.append('For String type inputs: \n')
         text.append(' • A value of null will be treated as an actual null value.\n')
         text.append(' • Using "null" or \'null\' to insert a string of null.')
-        print(Panel(text, title='Help', title_align=cls.title_align))
+        print_(Panel(text, title='Help', title_align=cls.title_align))
 
     @classmethod
     def table_file_results(cls, row_data: list[list[str]], title: str):
@@ -57,7 +57,7 @@ class Render(RenderUtil):
         for row in row_data:
             table.add_row(*row)
 
-        print(Panel(table, title=title, title_align=cls.title_align))
+        print_(Panel(table, title=title, title_align=cls.title_align))
 
     @classmethod
     def table_input_data(cls, data: ParamsModel):
@@ -94,7 +94,7 @@ class Render(RenderUtil):
         if vv:
             table.add_row('Valid Values', vv)
 
-        print(Panel(table, title=f'Collecting {data.type} Input', title_align=cls.title_align))
+        print_(Panel(table, title=f'Collecting {data.type} Input', title_align=cls.title_align))
 
     @classmethod
     def table_profile(cls, inputs: dict, staged_data: dict):
@@ -116,10 +116,9 @@ class Render(RenderUtil):
             # lookup the real value from the staged data, if not found use the input value
             value = staged_data.get(input_value)
             if value is None:
-                value = input_value
-                input_value = 'N/A'
-
-            table.add_row(key, str(value), input_value)
+                table.add_row(key, str(input_value), 'N/A')
+            else:
+                table.add_row(key, str(value), input_value)
 
         console = Console(emoji=False)
         console.print(Panel(table, title='Profile Data', title_align=cls.title_align))

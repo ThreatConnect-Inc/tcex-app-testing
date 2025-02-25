@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 from typing import TYPE_CHECKING, Any
 
@@ -21,9 +22,9 @@ class ValidatorKvstore:
 
     def _read_variable(self, variable: str) -> Any:
         if variable.endswith('Binary'):
-            app_data = self.playbook.read.binary(variable, False, False)
+            app_data = self.playbook.read.binary(variable, b64decode=False, decode=False)
         elif variable.endswith('BinaryArray'):
-            app_data = self.playbook.read.binary_array(variable, False, False)
+            app_data = self.playbook.read.binary_array(variable, b64decode=False, decode=False)
         else:
             app_data = self.playbook.read.variable(variable)
         return app_data
@@ -31,13 +32,7 @@ class ValidatorKvstore:
     def data(
         self, variable: str, test_data: dict | int | list | str, op: str | None = None, **kwargs
     ) -> tuple:
-        """Validate Redis data <operator> test_data.
-
-        Args:
-            variable: The variable to read from REDIS.
-            test_data: The validation data.
-            op: The comparison operator expression. Defaults to "eq".
-        """
+        """Validate Redis data <operator> test_data."""
         # remove comment field from kwargs if it exists
         kwargs.pop('comment', None)
 
@@ -173,7 +168,7 @@ class ValidatorKvstore:
 
     def rex(self, variable: str, data: str) -> tuple:
         """Test App data with regex"""
-        return self.data(variable, fr'{data}', op='rex')
+        return self.data(variable, rf'{data}', op='rex')
 
     def skip(self, variable: str, data: Any) -> tuple:
         """Test App data with regex"""

@@ -1,6 +1,4 @@
 """TcEx Framework Module"""
-# standard library
-import os
 
 # first-party
 from tcex_app_testing.config_model import config_model
@@ -31,8 +29,8 @@ class TemplatesFeature(TemplatesABC):
         variables = {'runtime_level': self.ij.model.runtime_level.lower()}
 
         # render the template
-        fqfn = os.path.join(config_model.test_case_feature_dir, filename)
-        self.render(f'{filename}.tpl', fqfn, variables)
+        fqfn = config_model.test_case_feature_dir / filename
+        self.render(f'{filename}.tpl', str(fqfn), variables)
 
     def init_py(self):
         """Render template file."""
@@ -43,8 +41,8 @@ class TemplatesFeature(TemplatesABC):
         variables = {'type': 'Feature'}
 
         # render the template
-        fqfn = os.path.join(config_model.test_case_feature_dir, filename)
-        self.render(f'{filename}.tpl', fqfn, variables, overwrite=True)
+        fqfn = config_model.test_case_feature_dir / filename
+        self.render(f'{filename}.tpl', str(fqfn), variables, overwrite=True)
 
     def render_templates(self):
         """Render the templates and write to disk conditionally."""
@@ -66,8 +64,8 @@ class TemplatesFeature(TemplatesABC):
         }
 
         # render the template
-        fqfn = os.path.join(config_model.test_case_feature_dir, filename)
-        self.render(f'{filename}.tpl', fqfn, variables, overwrite=True)
+        fqfn = config_model.test_case_feature_dir / filename
+        self.render(f'{filename}.tpl', str(fqfn), variables, overwrite=True)
 
     def validate_feature_py(self):
         """Render the validate_custom.py template."""
@@ -86,5 +84,5 @@ class TemplatesFeature(TemplatesABC):
             }
 
             # render the template
-            fqfn = os.path.join(config_model.test_case_feature_dir, filename)
-            self.render(f'{filename}.tpl', fqfn, variables)
+            fqfn = config_model.test_case_feature_dir / filename
+            self.render(f'{filename}.tpl', str(fqfn), variables)

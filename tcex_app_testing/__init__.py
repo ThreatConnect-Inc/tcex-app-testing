@@ -5,7 +5,7 @@ import logging
 
 # first-party
 from tcex_app_testing.__metadata__ import __license__, __version__
-from tcex_app_testing.logger.trace_logger import TraceLogger  # pylint: disable=no-name-in-module
+from tcex_app_testing.logger.trace_logger import TraceLogger
 
 
 def initialize_logger():

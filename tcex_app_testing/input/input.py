@@ -1,4 +1,5 @@
 """TcEx Framework Module"""
+
 # standard library
 import logging
 import re
@@ -39,7 +40,8 @@ class Input:
         """
         match = re.match(self.util.variable_tc_match, variable)
         if not match:
-            raise RuntimeError(f'Could not parse variable: {variable}')
+            ex_msg = f'Could not parse variable: {variable}'
+            raise RuntimeError(ex_msg)
 
         key = match.group('key')
         provider = match.group('provider')
@@ -57,12 +59,12 @@ class Input:
                 elif type_.lower() == 'keychain':
                     data = Sensitive(data)
             except Exception as ex:
-                raise RuntimeError(
+                ex_msg = (
                     f'Could not retrieve variable: provider={provider}, key={key}, type={type_}.'
-                ) from ex
+                )
+                raise RuntimeError(ex_msg) from ex
         else:
-            raise RuntimeError(
-                f'Could not retrieve variable: provider={provider}, key={key}, type={type_}.'
-            )
+            ex_msg = f'Could not retrieve variable: provider={provider}, key={key}, type={type_}.'
+            raise RuntimeError(ex_msg)
 
         return data
