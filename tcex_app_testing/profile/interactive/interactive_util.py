@@ -107,7 +107,7 @@ class InteractiveUtil:
     def _expand_valid_values_users_groups(self, valid_values: list):
         """Expand ${USERS} variable to full list."""
         valid_values.remove('${USER_GROUPS}')
-        valid_values.extend(['User Group 1', 'User Group 1'])
+        valid_values.extend(['User Group 1', 'User Group 2'])
 
     def expand_valid_values(self, valid_values: list) -> list:
         """Expand supported playbook variables to their full list."""

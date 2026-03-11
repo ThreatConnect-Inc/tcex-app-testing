@@ -1,5 +1,12 @@
 # Release Notes
 
+### 1.0.2
+
+-   APP-5128 - [Message-Broker] Updated message broker connection to not set tls_version
+-   APP-5129 - [Message-Broker] Updated Paho MQTT library and message broker reconnect logic
+-   APP-5130 - [Misc] Fixed invalid references and copy-paste issues
+-   APP-5131 - [Project] Updated pyproject to use bump-my-version
+
 ### 1.0.1
 
 -   APP-4723 - Added fake Redis server (only starts if Redis is not running)

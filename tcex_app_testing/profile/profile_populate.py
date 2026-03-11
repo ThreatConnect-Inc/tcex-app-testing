@@ -59,5 +59,5 @@ class ProfilePopulate:
                         )
                     profile = profile.replace(full_match, env_value)
             except IndexError:
-                Render.panel.warning(f'Could not replace variable {m}).')
+                Render.panel.warning(f'Could not replace variable {m.group(0)}.')
         return json.loads(profile)

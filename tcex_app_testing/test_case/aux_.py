@@ -336,6 +336,10 @@ class Aux:
                 if fail_on_error:
                     self.log.exception(f'step=run, event=replace-variables, error={full_match}')
                     Render.panel.failure(f'Invalid variable/jmespath found {full_match}.')
+                else:
+                    self.log.warning(
+                        f'step=run, event=replace-variables-non-fatal, error={full_match}'
+                    )
         profile_dict = json.loads(profile)
         profile_dict['outputs'] = outputs_section
         self._profile_runner.data = profile_dict
@@ -442,7 +446,8 @@ class Aux:
         if r.status_code == http_success:
             token = r.json().get('data')
             self.log.info(
-                f'step=setup, event=using-token, token={token}, token-elapsed={r.elapsed}'
+                f'step=setup, event=using-token, '
+                f'token=***{token[-4:] if token else ""}, token-elapsed={r.elapsed}'
             )
         else:
             self.log.error(f'step=setup, event=failed-to-retrieve-token error="{r.text}"')

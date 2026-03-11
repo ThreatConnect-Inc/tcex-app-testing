@@ -69,14 +69,14 @@ class TemplatesABC:
             with fqfn.open(encoding='utf-8') as fh:
                 return fh.read()
 
-        egg = zipfile.ZipFile('/'.join(egg_path), mode='r')  # pylint: disable=consider-using-with
-        internal_name = '/'.join(internal_path)
+        with zipfile.ZipFile('/'.join(egg_path), mode='r') as egg:
+            internal_name = '/'.join(internal_path)
 
-        if internal_name not in egg.namelist():
-            self.log.error(f'{internal_name} not found in egg.')
-            raise FileNotFoundError(internal_name)
+            if internal_name not in egg.namelist():
+                self.log.error(f'{internal_name} not found in egg.')
+                raise FileNotFoundError(internal_name)
 
-        return egg.read(internal_name).decode('utf-8')
+            return egg.read(internal_name).decode('utf-8')
 
     def render(
         self,

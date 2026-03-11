@@ -73,26 +73,25 @@ class Registry(Container):
         this registry as a factory.
         """
         for entry in dir(provider):
-            try:
-                provider_function = type(provider).__dict__[entry]
-                factory_provider = getattr(provider_function, 'factory_provider', None)
-                if factory_provider:
-                    provided_type, singleton = factory_provider
-                    if callable(provider_function):  # A function or member function
-                        # if it's a bound method, this will get the bound version
-                        provider_member = getattr(provider, entry)
-                        self.add_factory(provided_type, provider_member, singleton)
-                    elif hasattr(provider_function, '__get__'):
-                        # this is a property or non-callable descriptor:
-                        self.add_factory(
-                            provided_type,
-                            functools.partial(provider_function.__get__, provider, provider),
-                            singleton,
-                        )
-                    else:
-                        self.add_service(provided_type, provider_function)
-            except KeyError:
-                pass
+            provider_function = type(provider).__dict__.get(entry)
+            if provider_function is None:
+                continue
+            factory_provider = getattr(provider_function, 'factory_provider', None)
+            if factory_provider:
+                provided_type, singleton = factory_provider
+                if callable(provider_function):  # A function or member function
+                    # if it's a bound method, this will get the bound version
+                    provider_member = getattr(provider, entry)
+                    self.add_factory(provided_type, provider_member, singleton)
+                elif hasattr(provider_function, '__get__'):
+                    # this is a property or non-callable descriptor:
+                    self.add_factory(
+                        provided_type,
+                        functools.partial(provider_function.__get__, provider, provider),
+                        singleton,
+                    )
+                else:
+                    self.add_service(provided_type, provider_function)
 
     def _add(self, type_or_name: str | type, value: Callable | type | tuple[bool, Callable]):
         """Add a service to the registry."""

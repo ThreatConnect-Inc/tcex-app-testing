@@ -36,7 +36,7 @@ class Sensitive:
             self._sensitive_value = value.value
         else:
             self._sensitive_value = value
-        filter_sensitive.add(self._sensitive_value)
+        filter_sensitive.add(str(self._sensitive_value))
 
     @classmethod
     def __get_validators__(cls) -> Generator:
@@ -141,7 +141,7 @@ class Sensitive:
             # etc and the data is provided as a BinaryVariable object. This
             # is a special case where we need to return the value as a string.
             return str(self._sensitive_value)
-        return self._sensitive_value
+        return str(self._sensitive_value)
 
     @classmethod
     def wrap_type(cls, value: str) -> Self:

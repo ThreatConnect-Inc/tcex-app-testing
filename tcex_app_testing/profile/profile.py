@@ -1,4 +1,4 @@
-"""TcEx Framework Module"""  # noqa: A005
+"""TcEx Framework Module"""
 
 # standard library
 import json
@@ -194,11 +194,13 @@ class Profile:
             del _contents['options']
             _updated = True
 
-        # update inputs, converting array to dict
+        # update inputs, converting array to pipe-delimited string
         for input_type in ['defaults', 'optional', 'required']:
-            for _, v in _contents.get('inputs', {}).get(input_type, {}).items():
+            input_section = _contents.get('inputs', {}).get(input_type, {})
+            for k, v in input_section.items():
                 if isinstance(v, list):
-                    v = f'{self.ij.model.list_delimiter}'.join(v)  # noqa: PLW2901
+                    input_section[k] = f'{self.ij.model.list_delimiter}'.join(v)
+                    _updated = True
 
         if _updated is True:
             self.rewrite_contents(contents=_contents)

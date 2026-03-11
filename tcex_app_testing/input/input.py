@@ -28,7 +28,7 @@ class Input:
         self.log = _logger
         self.util = Util()
 
-    def resolve_variable(self, variable: str) -> bytes | str | Sensitive:
+    def resolve_variable(self, variable: str) -> bytes | str | Sensitive | None:
         """Resolve FILE/KEYCHAIN/TEXT variables.
 
         Feature: PLAT-2688

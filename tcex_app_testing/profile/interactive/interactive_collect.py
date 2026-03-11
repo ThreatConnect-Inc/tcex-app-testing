@@ -139,7 +139,7 @@ class InteractiveCollect:
             )
             return self.boolean(input_data_model)
 
-        input_value = cast(str, input_value)
+        input_value = cast('str', input_value)
 
         # convert input value to a proper boolean
         return Util.to_bool(input_value)
@@ -154,7 +154,7 @@ class InteractiveCollect:
             ),
             option_text=input_data_model.option_text,
         )
-        if not input and isinstance(input_data_model.default, str):
+        if not input_value and isinstance(input_data_model.default, str):
             input_value = input_data_model.default
 
         # ensure input value is provided when input is required

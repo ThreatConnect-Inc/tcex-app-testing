@@ -35,7 +35,6 @@ class Interactive:
             'required': {},
         }
         self._staging_data = {'kvstore': {}}
-        self._no_selection_text = 'No Selection'
         self.accent = 'dark_orange'
         self.collect = InteractiveCollect(self)
         self.exit_codes = []
@@ -274,7 +273,7 @@ class Interactive:
                     option_index = 0
                 else:
                     Render.panel.failure(
-                        f'Invalid value of ({default}) for {data.name}, check'
+                        f'Invalid value of ({default}) for {data.name}, check '
                         'that default value and validValues match in install.json.'
                     )
         option_text = f'{option_index}'

@@ -72,13 +72,14 @@ class ValidatorKvstore:
         """Validate that a variable is not empty/null"""
         # Could do something like self.ne(variable, None), but want to be pretty specific on
         # the errors on this one
+        if not variable:
+            self.log.error('step=validate, event=kvstore-variable-not-provided')
+            return False
+
         variable_data = self.playbook.read.variable(variable)
         self.log.info(
             f'step=validate, event=not-null, variable={variable}, db-data={variable_data}'
         )
-        if not variable:
-            self.log.error('step=validate, event=kvstore-variable-not-provided')
-            return False
 
         if not variable_data:
             self.log.error(

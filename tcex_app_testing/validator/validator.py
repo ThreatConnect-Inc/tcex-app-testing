@@ -52,8 +52,7 @@ class Validator(ValidatorABC):
     ) -> tuple:
         """Compare app_data to test data."""
         # remove comment field from kwargs if it exists
-        if 'comment' in kwargs:
-            del kwargs['comment']
+        kwargs.pop('comment', None)
 
         op = op or 'eq'
         if not self.get_operator(op):
@@ -120,19 +119,24 @@ class Validator(ValidatorABC):
             'startswith': self.operator_startswith,
             'sw': self.operator_startswith,
         }
-        return operators.get(op, None)  # noqa: SIM910
+        _operator = operators.get(op)
+        if not _operator:
+            ex_msg = f'step=validate, event=invalid-operator, op={op}'
+            self.log.error(ex_msg)
+            raise RuntimeError(ex_msg)
+        return _operator
 
     @cached_property
     def kvstore(self) -> ValidatorKvstore:
         """Return instance of ValidatorKvstore"""
         return ValidatorKvstore(self)
 
-    @cached_property
+    @property
     def redis(self) -> ValidatorKvstore:
         """Return instance of ValidatorKvstore"""
-        return ValidatorKvstore(self)
+        return self.kvstore
 
-    def remove_excludes(self, dict_1: dict | list, paths: list) -> dict:
+    def remove_excludes(self, dict_1: dict | list, paths: list) -> dict | list:
         """Remove a list of paths from a given dict
 
         ex:
@@ -162,7 +166,7 @@ class Validator(ValidatorABC):
         if isinstance(dict_1, list):
             for item in dict_1:
                 self.remove_excludes(item, paths)
-            return {}
+            return dict_1
 
         if not isinstance(dict_1, dict):
             ex_msg = f'Provided value ({dict_1}) must be a dict.'
