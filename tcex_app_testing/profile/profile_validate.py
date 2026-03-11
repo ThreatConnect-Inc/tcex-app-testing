@@ -2,7 +2,7 @@
 
 # standard library
 import json
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING
 
 # first-party
 from tcex_app_testing.config_model import config_model
@@ -105,11 +105,13 @@ class ProfileValidate:
                 if data is not None:
                     data = json.loads(data.decode('utf-8'))  # type: ignore
 
-                # data should be a string here
-                data = cast(str, data)
+                # validate string-specific checks only when data is a string
+                if isinstance(data, str):
+                    # check if data is wrapped in double quotes
+                    self._validate_double_quotes(data, variable)
 
-                # check if data is wrapped in double quotes
-                self._validate_double_quotes(data, variable)
+                    # check for suspect values in outputs
+                    self._validate_suspect_values(data, variable)
 
                 # check for possible null output values, but only if not a fail test case
                 if 0 in self.profile.model.exit_codes:
@@ -117,9 +119,6 @@ class ProfileValidate:
 
                 # APP-219 - check for "bad" output variable names
                 self._validate_raw_json(variable)
-
-                # check for suspect values in outputs
-                self._validate_suspect_values(data, variable)
 
     def validate_profile(self):
         """Validate profile.

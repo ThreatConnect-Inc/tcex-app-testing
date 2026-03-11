@@ -17,7 +17,7 @@ class TestCasePlaybook(TestCasePlaybookCommon):
     def run(self) -> int:
         """Run the Playbook App."""
         # third-party
-        from run import Run  # type: ignore
+        from run import Run  # type: ignore  # noqa: PLC0415
 
         # run the app
         exit_code = 0
@@ -32,7 +32,7 @@ class TestCasePlaybook(TestCasePlaybookCommon):
             run.teardown()
         except SystemExit as e:
             # e.code in actual, is an int "type(e.code) -> <class 'int'>"
-            exit_code = cast(int, e.code)
+            exit_code = cast('int', e.code)
 
         self.log.info(f'step=run, event=app-exit, exit-code={exit_code}')
         return exit_code
@@ -67,12 +67,9 @@ class TestCasePlaybook(TestCasePlaybookCommon):
             app_process = subprocess.Popen(['python', 'run.py'])  # nosec
             exit_code = app_process.wait()
 
-        try:
-            # remove env var for encrypted file if there
-            del os.environ['TC_APP_PARAM_KEY']
-            del os.environ['TC_APP_PARAM_FILE']
-        except KeyError:
-            pass
+        # remove env var for encrypted file if there
+        os.environ.pop('TC_APP_PARAM_KEY', None)
+        os.environ.pop('TC_APP_PARAM_FILE', None)
 
         # add context for populating output variables
         self.aux.profile_runner.add_context(self.aux.tc_playbook_kvstore_context)

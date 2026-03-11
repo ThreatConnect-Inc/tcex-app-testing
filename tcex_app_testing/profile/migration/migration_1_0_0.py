@@ -3,7 +3,6 @@
 # standard library
 import json
 import logging
-import os
 import re
 from collections import namedtuple
 from typing import TYPE_CHECKING
@@ -12,7 +11,6 @@ from typing import TYPE_CHECKING
 from packaging import version
 
 # first-party
-from tcex_app_testing.pleb.cached_property import cached_property
 from tcex_app_testing.profile.migration.migration import MigrationABC
 from tcex_app_testing.render.render import Render
 
@@ -140,7 +138,7 @@ class Migration_1_0_0(MigrationABC):  # noqa: N801
     def _determine_tc_root_type(self, data) -> str:
         type_ = data.get('type')
         if not type_:
-            Render.panel.warning(f'Unable to determine root type for TC data: {data}')
+            Render.panel.failure(f'Unable to determine root type for TC data: {data}')
         type_lower = type_.lower()
         prefixes_to_remove = ['ti_', 'cm_']
 
@@ -227,7 +225,3 @@ class Migration_1_0_0(MigrationABC):  # noqa: N801
             transformed_key = f'${{env.{key_}}}'
             contents_ = contents_.replace(full_match, transformed_key)
         return json.loads(contents_)
-
-    @cached_property
-    def _vault_base_path(self):
-        return os.getenv('TCEX_TEST_VAULT_BASE_PATH', '').rstrip('/').lstrip('/')

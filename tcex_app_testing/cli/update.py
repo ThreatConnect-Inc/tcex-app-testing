@@ -1,7 +1,6 @@
 """TcEx Framework Module"""
 
 # standard library
-import os
 from pathlib import Path
 
 # first-party
@@ -26,7 +25,7 @@ class Update(CliCommon):
 
     def update_feature_files(self):
         """Update all JSON profiles."""
-        for feature in os.listdir('tests'):
+        for feature in (p.name for p in Path('tests').iterdir()):
             # validate the feature dir
             if self.is_feature_directory(feature) is False:
                 continue
@@ -43,7 +42,8 @@ class Update(CliCommon):
     def update_profiles(self, feature: str):
         """Update all JSON profiles."""
         # iterate over all profiles in the profiles.d directory
-        for profile_filename in os.listdir(config_model.test_case_feature_profile_dir):
+        profile_dir = Path(config_model.test_case_feature_profile_dir)
+        for profile_filename in (p.name for p in profile_dir.iterdir()):
             self.log.debug(f'event=update-profile, profile-filename={profile_filename}')
 
             # strip the .json extension

@@ -47,12 +47,12 @@ class ValidatorABC(ABC):
             data_updated = []
             for ad in data:
                 ad_ = ad
-                if isinstance(ad, (OrderedDict | dict)):
-                    ad_ = json.dumps(ad)
+                if isinstance(ad_, (OrderedDict | dict)):
+                    ad_ = json.dumps(ad_)
 
-                with contextlib.suppress(Exception):
+                with contextlib.suppress(json.JSONDecodeError, TypeError, ValueError):
                     # APP-599 - best effort try to stringify value in list
-                    ad_ = json.loads(ad)  # type: ignore
+                    ad_ = json.loads(ad_)  # type: ignore
 
                 data_updated.append(ad_)
             return data_updated
@@ -82,7 +82,8 @@ class ValidatorABC(ABC):
         results = op(app_data, test_data)
         details = ''
         if not results:
-            details = f'{app_data} {type(app_data)} !(<=) {test_data} {type(test_data)}'
+            op_name = getattr(op, '__name__', str(op))
+            details = f'{app_data} {type(app_data)} !({op_name}) {test_data} {type(test_data)}'
         return results, details
 
     @staticmethod
@@ -148,10 +149,8 @@ class ValidatorABC(ABC):
                     self.log.error('step=validate, event=max-number-of-differences-reached')
                     break
                 diff_count += 1
-        except TypeError:
-            pass
-        except KeyError:
-            pass
+        except (TypeError, KeyError) as e:
+            self.log.warning(f'step=validate, event=diff-computation-failed, error={e}')
         return details
 
     def operator_date_format(self, app_data: list | str, test_data: str) -> tuple[bool, str]:
@@ -462,7 +461,9 @@ class ValidatorABC(ABC):
                 es = e.split('.')
                 data = self.remove_excludes(data, es)
             except (AttributeError, KeyError, TypeError):
-                self.log.exception('step=validate, event=invalid-validation-configuration')
+                self.log.exception(
+                    f'step=validate, event=invalid-validation-configuration, exclude={e}'
+                )
         return data
 
     def operator_keyvalue_eq(self, app_data: dict, test_data: dict, **kwargs) -> tuple:
@@ -527,7 +528,7 @@ class ValidatorABC(ABC):
             app_data: The data created by the App.
             test_data: The data provided in the test case.
         """
-        return self._basic_operator(app_data, test_data, operator.ge)
+        return self._basic_operator(app_data, test_data, operator.lt)
 
     def operator_ne(self, app_data: float | str, test_data: float | str) -> tuple:
         """Compare app data is not equal to tests data.
@@ -537,7 +538,7 @@ class ValidatorABC(ABC):
             test_data: The data provided in the test case.
         """
         results = operator.ne(app_data, test_data)
-        return results, self.details(app_data, test_data, 'eq')
+        return results, self.details(app_data, test_data, 'ne')
 
     def operator_regex_match(self, app_data: list | str, test_data: str):
         """Compare app data matches test regex data.

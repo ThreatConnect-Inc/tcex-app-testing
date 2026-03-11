@@ -87,7 +87,7 @@ class StagerVault:
                 f'Error reading from Vault for path {url}. Check access and credentials.'
             )
         except Exception as e:
-            self.log.exception('step=setup, event=env-store-generic-failure')
+            self.log.exception(f'step=setup, event=env-store-generic-failure, path={url}')
             Render.panel.failure(f'Error reading from Vault for path {url}: {e}.')
 
         return data.get('data', data).get('data', data)

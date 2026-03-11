@@ -125,7 +125,7 @@ class ConfigModel(BaseModel):
     #
 
     tc_in_path: str = Field(
-        env_store.getenv('TC_OUT_PATH', env_type='local', default='log'),
+        env_store.getenv('TC_IN_PATH', env_type='local', default='log'),
         app_input=True,
         description='The path to the Apps "in" directory.',
     )
@@ -140,7 +140,7 @@ class ConfigModel(BaseModel):
         description='The path to the Apps "out" directory.',
     )
     tc_temp_path: str = Field(
-        env_store.getenv('TC_OUT_PATH', env_type='local', default='log'),
+        env_store.getenv('TC_TEMP_PATH', env_type='local', default='log'),
         app_input=True,
         description='The path to the Apps "tmp" directory.',
     )
@@ -319,7 +319,7 @@ class ConfigModel(BaseModel):
     @property
     def tcex_testing_vault_base_path(self) -> str:
         """Return the base path for the vault."""
-        return os.getenv('TCEX_TESTING_VAULT_BASE_PATH', '').rstrip('/')
+        return os.getenv('TCEX_TEST_VAULT_BASE_PATH', '').rstrip('/')
 
     @property
     def test_case_data(self) -> list[str]:

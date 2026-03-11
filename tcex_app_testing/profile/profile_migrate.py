@@ -124,9 +124,9 @@ class ProfileMigrate:
         try:
             desired_version = ProfileModel.__fields__.get('schema_version').default  # type: ignore
             desired_version = version.parse(desired_version)
-        except Exception:
+        except Exception as ex:
             self.log.exception('Unable to parse desired version from ProfileModel.')
-            Render.panel.failure('Unable to parse desired version from ProfileModel.')
+            Render.panel.failure(f'Unable to parse desired version from ProfileModel: {ex}')
 
         migrations = [migration(contents) for migration in self.migrations]
         migrations = sorted(migrations, key=lambda migration: migration.start_version)

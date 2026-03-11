@@ -1,3 +1,3 @@
-"""TcEx Framework Module"""  # noqa: A005
+"""TcEx Framework Module"""
 
 from .profile import Profile

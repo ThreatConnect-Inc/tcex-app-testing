@@ -72,7 +72,7 @@ def create(
         Render.table_file_results(row_data, 'Test Case Create Results')
     except Exception as ex:
         _logger.exception('Error running the create command.')
-        Render.panel.failure(f'Exception: {ex}')
+        Render.panel.failure(f'{type(ex).__name__}: {ex}')
 
 
 @app.command()
@@ -101,7 +101,7 @@ def negative(
         Render.table_file_results(tcn.results, 'Test Case Create Negative Results')
     except Exception as ex:
         _logger.exception('Error running the negative command.')
-        Render.panel.failure(f'Exception: {ex}')
+        Render.panel.failure(f'{type(ex).__name__}: {ex}')
 
 
 @app.command()
@@ -127,7 +127,7 @@ def update():
             Render.table_file_results(row_data, 'Test Case Update Results')
     except Exception as ex:
         _logger.exception('Error running the update command.')
-        Render.panel.failure(f'Exception: {ex}')
+        Render.panel.failure(f'{type(ex).__name__}: {ex}')
 
 
 if __name__ == '__main__':
