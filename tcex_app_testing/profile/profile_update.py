@@ -60,10 +60,10 @@ class ProfileUpdate:
         contents['inputs'] = self._merge_inputs()
         return contents
 
-    def _merge_inputs(self) -> dict[str, dict[str, str]]:
+    def _merge_inputs(self) -> dict[str, dict[str, Any]]:
         """Merge all config inputs for Apps."""
         inputs = {}
-        merged_inputs = {
+        merged_inputs: dict[str, dict[str, Any]] = {
             'optional': {},
             'required': {},
         }
