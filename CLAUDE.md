@@ -37,20 +37,22 @@ This local repo is a **fork**. `origin` points at the fork; `upstream` is the Th
 - The usual "branch before committing on the default branch" convention does **not** apply to this
   fork — commits to `main` are expected (when the operator makes them — see below).
 
-### Commits are the operator's job — Claude never commits
+### Commits are the operator's job — Claude never stages and never commits
 
-**Claude Code must NEVER create a git commit.** ALL commits — in the parent repo **and** in every
-submodule — are made by the **human operator**. This is enforced by `enforce_no_commit.sh` (a
-PreToolUse hook) and a `Bash(git commit:*)` deny rule; both block `git commit` in any form
-(`-m`, `-a`, `--amend`, `git -C <submodule> commit`, after `&&`/pipes, …) with no override.
+**Claude Code must NEVER stage (`git add`) and NEVER create a git commit.** ALL staging and commits —
+in the parent repo **and** in every submodule — are done by the **human operator**. `git commit` is
+enforced by `enforce_no_commit.sh` (a PreToolUse hook) and a `Bash(git commit:*)` deny rule; both
+block `git commit` in any form (`-m`, `-a`, `--amend`, `git -C <submodule> commit`, after `&&`/pipes,
+…) with no override.
 
-Claude's role stops at **preparing** the change:
+Claude's role stops at **preparing** the change and leaving it **unstaged** for the human to review:
 
-- Make the edits, then `git add` the relevant paths (staging is allowed).
-- Run `git status` / `git diff --cached` to show exactly what is ready.
-- **Report** what is staged and the suggested commit message(s); the operator runs `git commit`.
-- The same applies to submodule changes: stage inside the submodule and describe the two-step
-  commit + pointer bump, but let the operator perform both commits.
+- Make the edits. Do **not** `git add` — leave every change unstaged in the working tree.
+- Run `git status` / `git diff` to show exactly what changed.
+- **Report** what changed and the suggested commit message(s); the operator reviews, runs `git add`,
+  then `git commit`.
+- The same applies to submodule changes: **describe** the two-step commit + pointer bump, but let the
+  operator perform both the staging and the commits.
 
 ## Git Submodules
 
@@ -168,7 +170,7 @@ restart). Shared, committed config (hooks, permissions, default agent) lives in 
 that `$CLAUDE_PROJECT_DIR` is populated only inside hook scripts, **not** in the normal Bash tool
 environment — do not use it in command examples; use `$PROJECT_ROOT`.
 
-Three `PreToolUse` hooks (in `.claude/scripts/`) enforce this — treat them as hard rules:
+Three `PreToolUse` hooks (in `.claude/hooks/`) enforce this — treat them as hard rules:
 
 - `enforce_no_dynamic_paths.sh` (Bash) — blocks commands containing path-resolving substitutions:
   `$(git …)`, `$(pwd)`, `$(realpath …)`, `$(readlink …)`, `$(cd … )` (and the backtick forms).
@@ -300,11 +302,12 @@ This project uses an orchestrator + specialist subagents (in `.claude/agents/`).
 | `python-test-engineer` | **All** pytest test cases under `tests/`. Does not modify source. |
 | `python-script-specialist` | **Sole author** of standalone scripts (typer + rich, dry-run/`--commit`). Writes to `.claude/scripts/`. |
 | `python-security-auditor` | **Hard security gate** — runs after every code/test/script change; HIGH/critical findings block "done" until fixed. |
+| `tcex-plan-reviewer` | **Opt-in plan-time review gate** — invoked by `tcex-orchestrator` on a freshly drafted plan when the user opts in; returns severity-graded findings (🔴/🟠/🟡) and iterates to convergence before the plan is presented. Distinct from `python-security-auditor` (which runs at implementation time). |
 
 ## One-Off Scripts (`.claude/scripts/`)
 
 All standalone scripts are authored by `python-script-specialist`. Agent-written helpers live in
-`.claude/scripts/` (alongside the `enforce_*.sh` PreToolUse hooks). A genuine one- or two-line `-c`
+`.claude/scripts/` (the enforcement hooks live separately in `.claude/hooks/`). A genuine one- or two-line `-c`
 invocation for ad-hoc context-gathering is fine and does not need delegation. Python scripts must use
 the venv's absolute `python` path.
 

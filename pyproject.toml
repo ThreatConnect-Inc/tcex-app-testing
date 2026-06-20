@@ -68,7 +68,7 @@ dev = [
   "pre-commit>=4.6.0",
   "pyupgrade>=3.21.2",
   "ruff>=0.15.16",
-  "ty~=0.0.43",
+  "ty~=0.0.51",
 ]
 
 [tool.setuptools.dynamic]
@@ -94,7 +94,7 @@ commit = false
 # Additional arguments to pass to the git commit command
 commit_args = "--no-verify"
 # The current version of the project
-current_version = "1.0.2-dev1"
+current_version = "1.0.2-dev2"
 # The commit message template used when committing version bumps
 message = "Version updated from {current_version} to {new_version}"
 # Regular expression for parsing version strings
